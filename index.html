@@ -29,7 +29,6 @@
     <h2 class="text-xl font-black tracking-widest text-gradient">GAMES STORE</h2>
 </div>
 
-<!-- Overlay البحث -->
 <div id="search-overlay" class="fixed inset-0 bg-black/90 z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
     <button onclick="toggleSearch()" class="absolute top-6 right-6 text-3xl hover:text-[#ff4a57] transition"><i class="bi bi-x-lg"></i></button>
     <div class="w-full max-w-2xl relative">
@@ -38,7 +37,6 @@
     </div>
 </div>
 
-<!-- سلة المشتريات -->
 <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#111] z-50 translate-x-full transition-transform duration-300 shadow-2xl border-l border-gray-800 flex flex-col">
     <div class="p-6 border-b border-gray-800 flex justify-between items-center">
         <h3 class="text-lg font-bold flex items-center gap-2"><i class="bi bi-bag-heart text-[#ff4a57]"></i> سلة المشتريات</h3>
@@ -59,7 +57,6 @@
     </div>
 </div>
 
-<!-- نموذج الشحن السريع عبر ID -->
 <div id="charge-modal" class="fixed inset-0 bg-black/85 z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
     <div class="bg-[#111] border border-gray-800 rounded-2xl w-full max-w-md p-6 relative">
         <button onclick="closeChargeModal()" class="absolute top-4 left-4 text-xl hover:text-[#ff4a57]"><i class="bi bi-x-lg"></i></button>
@@ -82,7 +79,6 @@
     </div>
 </div>
 
-<!-- شريط الإشعارات -->
 <div id="toast-msg" class="toast-notify"><i class="bi bi-check-circle-fill text-green-500"></i> <span id="toast-text"></span></div>
 
 <header class="sticky top-0 bg-[#0B0B0B]/80 backdrop-blur-md z-40 border-b border-gray-900">
@@ -98,11 +94,10 @@
     </div>
 </header>
 
-<!-- قسم البطل مع طرق الدفع السودانية -->
 <section class="relative bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200')] bg-cover bg-center py-20 md:py-32">
     <div class="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/70 to-transparent"></div>
     <div class="container mx-auto px-4 relative z-10 text-center md:text-right">
-        <span class="inline-block bg-[#ff4a57]/20 text-[#ff4a57] text-xs font-bold px-3 py-1.5 rounded-full border border-[#ff4a57]/30">جيمز استور</span>
+        <span class="inline-block bg-[#ff4a57]/20 text-[#ff4a57] text-xs font-bold px-3 py-1.5 rounded-full border border-[#ff4a57]/30">خصومات الموسم تصل إلى 50%</span>
         <h1 class="text-3xl md:text-6xl font-black mt-4">عالم الألعاب <span class="text-gradient">بين يديك الآن</span></h1>
         <p class="text-gray-300 mt-4 max-w-xl mx-auto md:mx-0">شحن فوري، بطاقات رقمية، دعم 24/7 وطرق دفع سودانية آمنة (بنكك، فوري، أووكاش، ماي كاشي).</p>
         <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
@@ -114,21 +109,21 @@
     </div>
 </section>
 
-<!-- الأقسام -->
 <section id="categories" class="container mx-auto px-4 py-16">
     <div class="flex items-center gap-3 mb-10"><div class="w-1 h-8 bg-[#ff4a57] rounded"></div><h2 class="text-2xl font-black">أقسام المتجر</h2></div>
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <div class="bg-[#111] border border-gray-900 rounded-2xl p-4 text-center hover:border-[#ff4a57] transition cursor-pointer" data-cat="freefire"><div class="w-12 h-12 bg-[#161616] rounded-xl flex items-center justify-center mx-auto mb-3"><i class="bi bi-controller text-2xl text-[#ff4a57]"></i></div><h3 class="font-bold">فري فاير</h3></div>
-        <div class="bg-[#111] border border-gray-900 rounded-2xl p-4 text-center hover:border-[#ff4a57] transition cursor-pointer" data-cat="pubg"><div class="w-12 h-12 bg-[#161616] rounded-xl flex items-center justify-center mx-auto mb-3"><i class="bi bi-shield-shaded text-2xl text-[#ff4a57]"></i></div><h3 class="font-bold">ببجي موبايل</h3></div>              </div>
+        <div class="bg-[#111] border border-gray-900 rounded-2xl p-4 text-center hover:border-[#ff4a57] transition cursor-pointer" data-cat="pubg"><div class="w-12 h-12 bg-[#161616] rounded-xl flex items-center justify-center mx-auto mb-3"><i class="bi bi-shield-shaded text-2xl text-[#ff4a57]"></i></div><h3 class="font-bold">ببجي موبايل</h3></div>            
+        <div class="bg-[#111] border border-gray-900 rounded-2xl p-4 text-center hover:border-[#ff4a57] transition cursor-pointer" data-cat="roblox"><div class="w-12 h-12 bg-[#161616] rounded-xl flex items-center justify-center mx-auto mb-3"><i class="bi bi-credit-card-2-front text-2xl text-[#ff4a57]"></i></div><h3 class="font-bold">روبلوكس</h3></div>
+        <div class="bg-[#111] border border-gray-900 rounded-2xl p-4 text-center hover:border-[#ff4a57] transition cursor-pointer" data-cat="cod"><div class="w-12 h-12 bg-[#161616] rounded-xl flex items-center justify-center mx-auto mb-3"><i class="bi bi-crosshair text-2xl text-[#ff4a57]"></i></div><h3 class="font-bold">كول اوف ديوتي</h3></div>
+    </div>
 </section>
 
-<!-- قائمة الألعاب -->
 <section id="products" class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6"><div class="flex items-center gap-3"><div class="w-1 h-8 bg-[#ff4a57] rounded"></div><h2 class="text-2xl font-black">الألعاب الأكثر مبيعاً</h2></div></div>
     <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
 </section>
 
-<!-- مدونة تعليمية -->
 <section class="container mx-auto px-4 py-12">
     <div class="text-center mb-8"><h2 class="text-2xl font-black">📘 أدلة الشحن السريع</h2><p class="text-gray-400 text-sm">تعلم كيفية الشحن عبر ID في دقائق</p></div>
     <div class="grid md:grid-cols-3 gap-6">
@@ -138,7 +133,6 @@
     </div>
 </section>
 
-<!-- قسم التقييمات -->
 <section id="comments" class="bg-[#111] border-y border-gray-900 py-16 my-6">
     <div class="container mx-auto px-4">
         <div class="text-center mb-8"><h2 class="text-2xl font-black">آراء عملائنا الحقيقية</h2><p class="text-gray-400 text-sm">شاركنا تجربتك مع المتجر</p></div>
@@ -170,36 +164,30 @@
 <a href="https://wa.me/249115169965" target="_blank" class="fixed bottom-6 left-4 z-40 w-12 h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-2xl hover:scale-110 transition"><i class="bi bi-whatsapp text-xl"></i></a>
 
 <script>
-    // المنتجات الثابتة
-    const productsData = [
-        { id: 1, name: "فري فاير - 1000 شدة", category: "freefire", priceSDG: 9.99, image: "https://images.unsplash.com/photo-1553481187-be93c21490a9?w=500", rate: 4.9, type: "id", desc: "شحن فوري عبر ID" },
-        { id: 2, name: "ببجي موبايل - 600 UC", category: "pubg", priceSDG: 5.99, image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500", rate: 4.8, type: "id", desc: "رصيد فوري" },
-        { id: 3, name: "روبلوكس - 800 روبوكس", category: "roblox", priceSDG: 9.50, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=500", rate: 5.0, type: "username", desc: "أدخل اسم المستخدم" },
-        { id: 4, name: "كول اوف ديوتي - CP 2400", category: "cod", priceSDG: 19.99, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500", rate: 4.7, type: "id", desc: "شحن فوري" },
-        { id: 5, name: "بلايستيشن بطاقة 20$", category: "cards", priceSDG: 20.00, image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500", rate: 4.9, type: "code", desc: "بطاقة رقمية ترسل على الإيميل" }
-    ];
-
+    // ------------------- البيانات من localStorage (متزامنة مع المسؤول) -------------------
+    let products = [];
     let cart = [];
     let reviews = [];
 
-    // دالة حفظ الطلب في لوحة المسؤول (localStorage)
-    function saveOrderToAdmin(cartItems, total, customerName = 'عميل واتساب') {
-        let orders = JSON.parse(localStorage.getItem('game_store_orders') || '[]');
-        let itemsDesc = cartItems.map(item => `${item.name} ×${item.quantity} ${item.extraId ? `(ID:${item.extraId})` : ''}`).join(', ');
-        let newOrder = {
-            id: Date.now(),
-            date: new Date().toLocaleString('ar-EG'),
-            customer: customerName,
-            itemsDesc: itemsDesc,
-            total: total,
-            status: 'جديد',
-            fromAdmin: false
-        };
-        orders.unshift(newOrder);
-        localStorage.setItem('game_store_orders', JSON.stringify(orders));
+    // تحميل المنتجات (من نفس مفتاح المسؤول)
+    function loadProducts() {
+        let stored = localStorage.getItem('game_store_products');
+        if(stored) {
+            products = JSON.parse(stored);
+        } else {
+            // منتجات افتراضية إن لم توجد
+            products = [
+                { id: 1, name: "فري فاير - 1000 شدة", priceSDG: 9.99, image: "https://images.unsplash.com/photo-1553481187-be93c21490a9?w=500", category: "freefire", desc: "شحن فوري عبر ID", rate: 4.9, type: "id" },
+                { id: 2, name: "ببجي موبايل - 600 UC", priceSDG: 5.99, image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500", category: "pubg", desc: "رصيد فوري", rate: 4.8, type: "id" },
+                { id: 3, name: "روبلوكس - 800 روبوكس", priceSDG: 9.50, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=500", category: "roblox", desc: "أدخل اسم المستخدم", rate: 5.0, type: "username" },
+                { id: 4, name: "كول اوف ديوتي - CP 2400", priceSDG: 19.99, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500", category: "cod", desc: "شحن فوري", rate: 4.7, type: "id" },
+                { id: 5, name: "بلايستيشن بطاقة 20$", priceSDG: 20.00, image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500", category: "cards", desc: "بطاقة رقمية", rate: 4.9, type: "code" }
+            ];
+            localStorage.setItem('game_store_products', JSON.stringify(products));
+        }
+        renderProducts();
     }
 
-    // باقي دوال السلة والتقييمات (مثل السابق مع إضافة حفظ الطلب عند إرسال واتساب)
     function loadReviews() {
         let saved = localStorage.getItem('game_store_reviews');
         if(saved) reviews = JSON.parse(saved);
@@ -225,16 +213,12 @@
         `).join('');
     }
 
+    // السلة
     function saveCart() { localStorage.setItem('game_store_cart', JSON.stringify(cart)); updateCartBadge(); renderCartSidebar(); }
     function loadCart() { let saved = localStorage.getItem('game_store_cart'); if(saved) cart = JSON.parse(saved); updateCartBadge(); renderCartSidebar(); }
     function updateCartBadge() { document.getElementById('cart-badge').innerText = cart.reduce((sum, i) => sum + i.quantity, 0); }
-    function showToast(msg, isError = false) { 
-        let toast = document.getElementById('toast-msg');
-        document.getElementById('toast-text').innerText = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
-    }
-    
+    function showToast(msg) { let toast = document.getElementById('toast-msg'); document.getElementById('toast-text').innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
+
     function addToCart(product, idValue = null) {
         let existing = cart.find(i => i.id === product.id && (!i.extraId || i.extraId === idValue));
         if(existing) { existing.quantity += 1; }
@@ -242,7 +226,7 @@
         saveCart();
         showToast(`✅ تم إضافة ${product.name} إلى السلة`);
     }
-    
+
     function renderCartSidebar() {
         let container = document.getElementById('cart-items-container');
         if(!cart.length) { container.innerHTML = '<div class="text-center text-gray-500">سلة فارغة</div>'; document.getElementById('cart-total-amount').innerHTML = '0.00 ج.س'; return; }
@@ -260,7 +244,7 @@
         container.innerHTML = html;
         document.getElementById('cart-total-amount').innerHTML = totalSDG.toFixed(2) + ' ج.س';
     }
-    
+
     window.updateQuantity = function(idx, delta) {
         let newQ = cart[idx].quantity + delta;
         if(newQ <= 0) cart.splice(idx,1);
@@ -268,27 +252,44 @@
         saveCart(); renderCartSidebar();
     };
     window.removeCartItem = function(idx) { cart.splice(idx,1); saveCart(); renderCartSidebar(); };
-    
+
+    // حفظ الطلب في لوحة المسؤول
+    function saveOrderToAdmin(cartItems, total, customerName = 'عميل واتساب') {
+        let orders = JSON.parse(localStorage.getItem('game_store_orders') || '[]');
+        let itemsDesc = cartItems.map(item => `${item.name} ×${item.quantity} ${item.extraId ? `(ID:${item.extraId})` : ''}`).join(', ');
+        let newOrder = {
+            id: Date.now(),
+            date: new Date().toLocaleString('ar-EG'),
+            customer: customerName,
+            itemsDesc: itemsDesc,
+            total: total,
+            status: 'جديد',
+            fromStore: true
+        };
+        orders.unshift(newOrder);
+        localStorage.setItem('game_store_orders', JSON.stringify(orders));
+    }
+
     function generateWhatsAppMessage() {
         if(!cart.length) return null;
         let details = cart.map(item => `• ${item.name} ×${item.quantity} = ${(item.priceSDG * item.quantity).toFixed(2)} ج.س ${item.extraId ? `(ID: ${item.extraId})` : ''}`).join('%0A');
         let total = cart.reduce((s,i)=> s + (i.priceSDG * i.quantity),0).toFixed(2);
         let message = `🛒 *طلب جديد من GAMES STORE*%0A%0A${details}%0A%0A💰 *الإجمالي:* ${total} ج.س%0A%0A📍 طرق الدفع: بنكك / فوري / أووكاش / ماي كاشي%0A📲 الرجاء إرسال تأكيد الدفع بعد التحويل.`;
-        return { message, total: parseFloat(total), details: details.replace(/%0A/g, ', ') };
+        return { message, total: parseFloat(total) };
     }
-    
+
     document.getElementById('whatsapp-order-btn')?.addEventListener('click', () => {
         if(!cart.length) { showToast("السلة فارغة، أضف منتجات أولاً", true); return; }
-        let { message, total, details } = generateWhatsAppMessage();
-        // حفظ الطلب في لوحة المسؤول
+        let { message, total } = generateWhatsAppMessage();
         saveOrderToAdmin(cart, total, 'عميل واتساب');
         let url = `https://wa.me/249115169965?text=${message}`;
         window.open(url, '_blank');
         showToast("✓ تم توجيهك إلى واتساب وتم تسجيل طلبك لدى الإدارة");
-        // اختياري: تفريغ السلة بعد الطلب
+        // يمكن تفريغ السلة بعد الطلب (اختياري)
         // cart = []; saveCart(); renderCartSidebar();
     });
-    
+
+    // الشحن عبر ID
     let currentModalProduct = null;
     function openChargeModal(product) { currentModalProduct = product; document.getElementById('modal-game-title').innerText = `شحن ${product.name}`; document.getElementById('charge-modal').classList.remove('hidden'); setTimeout(()=> document.getElementById('charge-modal').classList.remove('opacity-0'),10); }
     function closeChargeModal() { let modal = document.getElementById('charge-modal'); modal.classList.add('opacity-0'); setTimeout(()=> modal.classList.add('hidden'),300); }
@@ -302,13 +303,13 @@
         closeChargeModal();
         document.getElementById('player-id').value = '';
     }
-    
-    function renderProducts(products = productsData) {
+
+    function renderProducts() {
         let grid = document.getElementById('products-grid');
         grid.innerHTML = products.map(p => `
             <div class="bg-[#111] rounded-2xl overflow-hidden border border-gray-900 hover:border-gray-700 transition group">
                 <img src="${p.image}" class="w-full h-44 object-cover group-hover:scale-105 transition">
-                <div class="p-4"><div class="flex justify-between"><span class="text-xs text-gray-400">${p.desc}</span><div class="text-yellow-400 text-xs">★ ${p.rate}</div></div>
+                <div class="p-4"><div class="flex justify-between"><span class="text-xs text-gray-400">${p.desc}</span><div class="text-yellow-400 text-xs">★ ${p.rate || 4.5}</div></div>
                 <h3 class="font-bold mt-1">${p.name}</h3>
                 <div class="flex justify-between items-center mt-3"><span class="text-[#ff4a57] font-bold">${p.priceSDG.toFixed(2)} ج.س</span>
                 <button onclick="openChargeModalForProduct(${p.id})" class="bg-[#ff4a57] hover:bg-[#ee0979] text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1"><i class="bi bi-lightning-charge"></i> شحن فوري</button>
@@ -316,13 +317,13 @@
             </div>
         `).join('');
     }
-    window.openChargeModalForProduct = function(productId) { let prod = productsData.find(p=>p.id===productId); if(prod) openChargeModal(prod); else showToast("خطأ",true); };
-    
-    function filterProducts() { let query = document.getElementById('search-input')?.value.toLowerCase(); if(query) renderProducts(productsData.filter(p=>p.name.includes(query))); else renderProducts(); }
+    window.openChargeModalForProduct = function(productId) { let prod = products.find(p=>p.id===productId); if(prod) openChargeModal(prod); else showToast("خطأ",true); };
+
+    function filterProducts() { let query = document.getElementById('search-input')?.value.toLowerCase(); if(query) renderProducts(products.filter(p=>p.name.includes(query))); else renderProducts(); }
     document.getElementById('search-input')?.addEventListener('input', filterProducts);
     function toggleSearch() { let ov = document.getElementById('search-overlay'); if(ov.classList.contains('hidden')){ ov.classList.remove('hidden'); setTimeout(()=> ov.classList.remove('opacity-0'),10); } else { ov.classList.add('opacity-0'); setTimeout(()=> ov.classList.add('hidden'),300); } }
     function toggleCart() { document.getElementById('cart-sidebar').classList.toggle('translate-x-full'); }
-    
+
     let selectedRating = 0;
     function initStarRating() {
         const stars = document.querySelectorAll('#rating-stars-input i');
@@ -346,11 +347,11 @@
             document.querySelectorAll('#rating-stars-input i').forEach(s => s.classList.remove('active'));
         } else showToast("حدث خطأ", true);
     });
-    
+
     window.addEventListener('load', () => {
         document.getElementById('preloader').classList.add('opacity-0','pointer-events-none');
+        loadProducts();
         loadCart();
-        renderProducts();
         loadReviews();
         initStarRating();
     });
