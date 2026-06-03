@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>GAMES STORE | منصة الألعاب الفاخرة - Esports Premium</title>
+    <title>GAMES STORE | منصة الألعاب</title>
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- خطوط فاخرة -->
@@ -50,7 +50,7 @@
             padding: 80px 0;
         }
 
-        /* ========== الهيدر الفاخر المُصلح ========== */
+        /* ========== الهيدر الفاخر ========== */
         .premium-header {
             position: sticky;
             top: 0;
@@ -700,7 +700,7 @@
 </head>
 <body>
 
-<!-- الهيدر المُعاد هيكلته بشكل صحيح -->
+<!-- الهيدر -->
 <div class="premium-header">
     <div class="header-main-row">
         <div class="header-actions">
@@ -810,8 +810,16 @@
 <a href="https://wa.me/249115169965" target="_blank" class="whatsapp-float"><i class="bi bi-headset"></i></a>
 
 <script>
-    // قاعدة بيانات المنتجات (بدون تغيير)
-    const products = [
+    // ========== مزامنة كاملة مع لوحة التحكم ==========
+    const STORAGE_KEYS = {
+        PRODUCTS: 'games_store_products',
+        ORDERS: 'games_store_orders',
+        ADMINS: 'games_store_admins',
+        CART: 'games_store_cart'
+    };
+
+    // المنتجات الافتراضية (متطابقة مع لوحة التحكم)
+    const defaultProducts = [
         { id: 1, name: "شحن 1200 جوهرة فري فاير", category: "Free Fire", price: 14900, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&auto=format", premium: true },
         { id: 2, name: "شدة 660 UC + 60 هدية ببجي", category: "PUBG", price: 18500, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&auto=format", premium: false },
         { id: 3, name: "بطاقة بلاي ستيشن 20$", category: "PlayStation", price: 32000, image: "https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=400&auto=format", premium: true },
@@ -820,11 +828,34 @@
         { id: 6, name: "فيفا 26 نقاط مستقبلية", category: "EA FC", price: 33900, image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&auto=format", premium: false }
     ];
 
-    let cart = JSON.parse(localStorage.getItem("games_store_cart")) || [];
+    // تهيئة المنتجات في localStorage إذا لم تكن موجودة
+    function initProducts() {
+        if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(defaultProducts));
+        }
+        if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([]));
+        }
+    }
+
+    // الحصول على المنتجات الحية من localStorage
+    function getProducts() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || defaultProducts;
+    }
+
+    // السلة (محفوظة محلياً)
+    let cart = JSON.parse(localStorage.getItem(STORAGE_KEYS.CART)) || [];
+
+    function saveCart() {
+        localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+        updateCartUI();
+        updateCartCount();
+    }
 
     function renderProducts() {
         const grid = document.getElementById("productsGrid");
         if(!grid) return;
+        const products = getProducts();
         grid.innerHTML = products.map(p => `
             <div class="game-card">
                 <div class="card-img">
@@ -853,6 +884,7 @@
 
     function handleAddClick(e) {
         const id = parseInt(e.currentTarget.dataset.id);
+        const products = getProducts();
         const product = products.find(p => p.id === id);
         if(product) addToCart(product);
     }
@@ -861,14 +893,8 @@
         const exist = cart.find(i => i.id === product.id);
         if(exist) exist.quantity += 1;
         else cart.push({ ...product, quantity: 1 });
-        saveCartAndSync();
+        saveCart();
         showToast(`✅ تم إضافة ${product.name} إلى السلة`);
-    }
-
-    function saveCartAndSync() {
-        localStorage.setItem("games_store_cart", JSON.stringify(cart));
-        updateCartUI();
-        updateCartCount();
     }
 
     function updateCartUI() {
@@ -887,7 +913,7 @@
             return `<div class="cart-item"><div class="cart-item-info"><h4>${item.name}</h4><p>${item.price.toLocaleString()} SDG</p></div><div class="cart-qty"><button class="qty-minus" data-id="${item.id}">-</button><span>${item.quantity}</span><button class="qty-plus" data-id="${item.id}">+</button></div></div>`;
         }).join('');
         if(totalSpan) totalSpan.innerText = total.toLocaleString() + " SDG";
-        // ربط أزرار +/- داخل السلة
+        // ربط أزرار +/-
         document.querySelectorAll('.qty-minus').forEach(btn => {
             btn.addEventListener('click', () => changeQty(parseInt(btn.dataset.id), -1));
         });
@@ -901,7 +927,7 @@
         if(idx !== -1) {
             cart[idx].quantity += delta;
             if(cart[idx].quantity <= 0) cart.splice(idx,1);
-            saveCartAndSync();
+            saveCart();
         }
     };
 
@@ -928,16 +954,41 @@
         setTimeout(() => toast.remove(), 2500);
     }
 
+    // حفظ الطلب في localStorage ليتزامن مع لوحة التحكم
+    function saveOrder() {
+        if(cart.length === 0) return false;
+        const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)) || [];
+        const newOrder = {
+            id: Date.now(),
+            items: cart.map(item => ({ id: item.id, name: item.name, quantity: item.quantity, price: item.price })),
+            total: cart.reduce((sum, i) => sum + (i.price * i.quantity), 0),
+            status: "قيد الانتظار",
+            createdAt: new Date().toISOString()
+        };
+        orders.push(newOrder);
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+        return newOrder;
+    }
+
     function checkoutWhatsapp() {
         if(cart.length === 0) { showToast("السلة فارغة"); return; }
+        // حفظ الطلب في localStorage قبل إرسال الواتساب
+        const order = saveOrder();
+        if(!order) return;
+        // إعداد رسالة واتساب
         let msg = `🛒 *طلب شراء من GAMES STORE*%0A%0A`;
         let total = 0;
         cart.forEach(p => { total += p.price * p.quantity; msg += `• ${p.name} × ${p.quantity} = ${(p.price * p.quantity).toLocaleString()} SDG%0A`; });
         msg += `%0A💰 *الإجمالي: ${total.toLocaleString()} SDG*%0A%0A📍 العميل: السودان - الرجاء تأكيد الطلب وشكراً`;
+        msg += `%0A%0A📌 رقم الطلب: ${order.id}`;
         window.open(`https://wa.me/249115169965?text=${msg}`, '_blank');
+        // تفريغ السلة بعد الطلب
+        cart = [];
+        saveCart();
+        showToast("تم إرسال الطلب بنجاح! سيتم التواصل معك قريباً.");
     }
 
-    // عناصر ال DOM
+    // أحداث DOM
     const cartSidebar = document.getElementById("cartSidebar");
     const searchModal = document.getElementById("searchModal");
     const cartIconBtn = document.getElementById("cartIconBtn");
@@ -954,7 +1005,7 @@
 
     if(cartIconBtn) cartIconBtn.addEventListener("click", () => cartSidebar.classList.add("active"));
     if(closeCart) closeCart.addEventListener("click", () => cartSidebar.classList.remove("active"));
-    if(clearCartBtn) clearCartBtn.addEventListener("click", () => { cart = []; saveCartAndSync(); showToast("تم تفريغ السلة"); });
+    if(clearCartBtn) clearCartBtn.addEventListener("click", () => { cart = []; saveCart(); showToast("تم تفريغ السلة"); });
     if(checkoutBtn) checkoutBtn.addEventListener("click", checkoutWhatsapp);
     if(shopNowBtn) shopNowBtn.addEventListener("click", () => document.getElementById("games")?.scrollIntoView({ behavior: "smooth" }));
     if(openSearchBtn) openSearchBtn.addEventListener("click", () => searchModal.classList.add("active"));
@@ -965,11 +1016,12 @@
     if(cartSidebar) cartSidebar.addEventListener("click", (e) => { if(e.target === cartSidebar) cartSidebar.classList.remove("active"); });
     if(searchModal) searchModal.addEventListener("click", (e) => { if(e.target === searchModal) searchModal.classList.remove("active"); });
 
-    // البحث المباشر
+    // البحث المباشر باستخدام المنتجات من localStorage
     if(liveSearchInput) {
         liveSearchInput.addEventListener("input", function() {
             const val = this.value.trim().toLowerCase();
             if(!val) { if(liveResults) liveResults.innerHTML = ""; return; }
+            const products = getProducts();
             const filtered = products.filter(p => p.name.toLowerCase().includes(val) || p.category.toLowerCase().includes(val));
             if(liveResults) {
                 if(filtered.length === 0) liveResults.innerHTML = "<p style='color:#B5B5B5;'>لا توجد نتائج</p>";
@@ -984,6 +1036,7 @@
                     document.querySelectorAll('.search-add-cart').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const id = parseInt(btn.dataset.id);
+                            const products = getProducts();
                             const prod = products.find(x => x.id === id);
                             if(prod) addToCart(prod);
                             searchModal.classList.remove("active");
@@ -996,6 +1049,8 @@
         });
     }
 
+    // بدء التشغيل
+    initProducts();
     renderProducts();
     updateCartUI();
     updateCartCount();
