@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>لوحة تحكم GAMES STORE | الإدارة الفاخرة</title>
+    <title>لوحة تحكم GAMES STORE | استيراد متعدد الأنواع</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -32,7 +32,6 @@
             margin: 0 auto;
             padding: 20px;
         }
-        /* Header */
         .admin-header {
             display: flex;
             justify-content: space-between;
@@ -55,7 +54,6 @@
         .user-info { display: flex; gap: 15px; align-items: center; background: var(--surface); padding: 8px 18px; border-radius: 40px; border: 1px solid var(--border-light); }
         .logout-btn { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 6px 16px; border-radius: 30px; cursor: pointer; transition: 0.2s; }
         .logout-btn:hover { background: var(--primary); color: white; }
-        /* Login Box */
         .login-wrapper {
             display: flex;
             justify-content: center;
@@ -108,7 +106,6 @@
             gap: 8px;
         }
         .btn-outline:hover { background: var(--primary); }
-        /* Dashboard */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -135,6 +132,7 @@
             gap: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            align-items: center;
         }
         table {
             width: 100%;
@@ -211,469 +209,614 @@
             .admin-container { padding: 12px; }
             th, td { font-size: 13px; padding: 8px; }
         }
+        .file-type-badge {
+            background: #2a2a2a;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body id="adminApp">
-    <script>
-        // ------------------- مزامنة كاملة مع المتجر -------------------
-        const STORAGE_KEYS = {
-            PRODUCTS: 'games_store_products',
-            ORDERS: 'games_store_orders',
-            ADMINS: 'games_store_admins',
-            CART: 'games_store_cart'
-        };
+<script>
+    // ------------------- المفاتيح والإعدادات الأساسية -------------------
+    const STORAGE_KEYS = {
+        PRODUCTS: 'games_store_products',
+        ORDERS: 'games_store_orders',
+        ADMINS: 'games_store_admins',
+        CART: 'games_store_cart'
+    };
 
-        // المنتجات الافتراضية (متطابقة مع المتجر)
-        const defaultProducts = [
-            { id: 1, name: "شحن 1200 جوهرة فري فاير", category: "Free Fire", price: 14900, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&auto=format", premium: true },
-            { id: 2, name: "شدة 660 UC + 60 هدية ببجي", category: "PUBG", price: 18500, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&auto=format", premium: false },
-            { id: 3, name: "بطاقة بلاي ستيشن 20$", category: "PlayStation", price: 32000, image: "https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=400&auto=format", premium: true },
-            { id: 4, name: "كول أوف ديوتي 5000 CP", category: "Call of Duty", price: 22900, image: "https://images.unsplash.com/photo-1542751110-97427bbecf20?w=400&auto=format", premium: false },
-            { id: 5, name: "شدات فالورانت VP", category: "Valorant", price: 27500, image: "https://images.unsplash.com/photo-1614680376408-81e91ffe3db6?w=400&auto=format", premium: true },
-            { id: 6, name: "فيفا 26 نقاط مستقبلية", category: "EA FC", price: 33900, image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&auto=format", premium: false }
-        ];
+    // المنتجات الافتراضية
+    const defaultProducts = [
+        { id: 1, name: "شحن 1200 جوهرة فري فاير", category: "Free Fire", price: 14900, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&auto=format", premium: true },
+        { id: 2, name: "شدة 660 UC + 60 هدية ببجي", category: "PUBG", price: 18500, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&auto=format", premium: false },
+        { id: 3, name: "بطاقة بلاي ستيشن 20$", category: "PlayStation", price: 32000, image: "https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=400&auto=format", premium: true },
+        { id: 4, name: "كول أوف ديوتي 5000 CP", category: "Call of Duty", price: 22900, image: "https://images.unsplash.com/photo-1542751110-97427bbecf20?w=400&auto=format", premium: false },
+        { id: 5, name: "شدات فالورانت VP", category: "Valorant", price: 27500, image: "https://images.unsplash.com/photo-1614680376408-81e91ffe3db6?w=400&auto=format", premium: true },
+        { id: 6, name: "فيفا 26 نقاط مستقبلية", category: "EA FC", price: 33900, image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&auto=format", premium: false }
+    ];
 
-        const masterAdmin = { username: "Mazin Hassan", password: "panda@2025", role: "super", permissions: { products: true, orders: true, admins: true } };
+    const masterAdmin = { username: "Mazin Hassan", password: "panda@2025", role: "super", permissions: { products: true, orders: true, admins: true } };
 
-        // تهيئة التخزين
-        function initStorage() {
-            if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
-                localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(defaultProducts));
-            }
-            if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
-                localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([]));
-            }
-            if (!localStorage.getItem(STORAGE_KEYS.ADMINS)) {
-                localStorage.setItem(STORAGE_KEYS.ADMINS, JSON.stringify([{ ...masterAdmin, id: 1 }]));
-            }
+    // تهيئة التخزين
+    function initStorage() {
+        if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(defaultProducts));
         }
-
-        function getProducts() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)); }
-        function saveProducts(products) { localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products)); }
-        function getOrders() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)); }
-        function saveOrders(orders) { localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders)); }
-        function getAdmins() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.ADMINS)); }
-        function saveAdmins(admins) { localStorage.setItem(STORAGE_KEYS.ADMINS, JSON.stringify(admins)); }
-
-        // ---------- نظام المصادقة والجلسة ----------
-        let currentUser = null;
-
-        function isLoggedIn() {
-            const session = sessionStorage.getItem('admin_session');
-            if (session) {
-                try {
-                    currentUser = JSON.parse(session);
-                    return true;
-                } catch(e) {}
-            }
-            return false;
+        if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([]));
         }
+        if (!localStorage.getItem(STORAGE_KEYS.ADMINS)) {
+            localStorage.setItem(STORAGE_KEYS.ADMINS, JSON.stringify([{ ...masterAdmin, id: 1 }]));
+        }
+    }
 
-        function login(username, password) {
-            if (username === masterAdmin.username && password === masterAdmin.password) {
-                currentUser = { username: masterAdmin.username, role: 'super', permissions: { products: true, orders: true, admins: true } };
-                sessionStorage.setItem('admin_session', JSON.stringify(currentUser));
+    function getProducts() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)); }
+    function saveProducts(products) { localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products)); }
+    function getOrders() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)); }
+    function saveOrders(orders) { localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders)); }
+    function getAdmins() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.ADMINS)); }
+    function saveAdmins(admins) { localStorage.setItem(STORAGE_KEYS.ADMINS, JSON.stringify(admins)); }
+
+    // ---------- نظام المصادقة والجلسة ----------
+    let currentUser = null;
+
+    function isLoggedIn() {
+        const session = sessionStorage.getItem('admin_session');
+        if (session) {
+            try {
+                currentUser = JSON.parse(session);
                 return true;
-            }
-            const admins = getAdmins();
-            const found = admins.find(adm => adm.username === username && adm.password === password && adm.role === 'sub');
-            if (found) {
-                currentUser = { username: found.username, role: 'sub', permissions: found.permissions };
-                sessionStorage.setItem('admin_session', JSON.stringify(currentUser));
-                return true;
-            }
-            return false;
+            } catch(e) {}
         }
+        return false;
+    }
 
-        function logout() {
-            sessionStorage.removeItem('admin_session');
-            currentUser = null;
-            renderApp();
-        }
-
-        function hasPermission(perm) {
-            if (!currentUser) return false;
-            if (currentUser.role === 'super') return true;
-            return currentUser.permissions[perm] === true;
-        }
-
-        // ---------- إدارة المنتجات ----------
-        function addProduct(product) {
-            const products = getProducts();
-            const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 7;
-            product.id = newId;
-            products.push(product);
-            saveProducts(products);
-            renderDashboard();
-            showToast("تم إضافة المنتج بنجاح");
-        }
-
-        function updateProduct(updated) {
-            let products = getProducts();
-            products = products.map(p => p.id === updated.id ? updated : p);
-            saveProducts(products);
-            renderDashboard();
-            showToast("تم تحديث المنتج");
-        }
-
-        function deleteProduct(id) {
-            let products = getProducts();
-            products = products.filter(p => p.id !== id);
-            saveProducts(products);
-            renderDashboard();
-            showToast("تم حذف المنتج");
-        }
-
-        // ---------- إدارة المشرفين الفرعيين ----------
-        function addSubAdmin(username, password, canManageProducts, canManageOrders) {
-            const admins = getAdmins();
-            if (admins.find(a => a.username === username)) { showToast("اسم المستخدم موجود بالفعل"); return false; }
-            const newAdmin = {
-                id: Date.now(),
-                username,
-                password,
-                role: "sub",
-                permissions: { products: canManageProducts, orders: canManageOrders, admins: false }
-            };
-            admins.push(newAdmin);
-            saveAdmins(admins);
-            showToast(`تم إضافة المشرف ${username}`);
-            renderDashboard();
+    function login(username, password) {
+        if (username === masterAdmin.username && password === masterAdmin.password) {
+            currentUser = { username: masterAdmin.username, role: 'super', permissions: { products: true, orders: true, admins: true } };
+            sessionStorage.setItem('admin_session', JSON.stringify(currentUser));
             return true;
         }
-
-        function deleteSubAdmin(id) {
-            let admins = getAdmins();
-            const target = admins.find(a => a.id === id);
-            if (target && target.username === masterAdmin.username) { showToast("لا يمكن حذف المشرف الرئيسي"); return; }
-            admins = admins.filter(a => a.id !== id);
-            saveAdmins(admins);
-            renderDashboard();
-            showToast("تم حذف المشرف");
+        const admins = getAdmins();
+        const found = admins.find(adm => adm.username === username && adm.password === password && adm.role === 'sub');
+        if (found) {
+            currentUser = { username: found.username, role: 'sub', permissions: found.permissions };
+            sessionStorage.setItem('admin_session', JSON.stringify(currentUser));
+            return true;
         }
+        return false;
+    }
 
-        // ---------- الطلبات (متزامنة مع المتجر) ----------
-        // يتم حفظ الطلبات من المتجر عبر localStorage، وهنا نعرضها وندير حالتها
-        function updateOrderStatus(orderId, newStatus) {
-            let orders = getOrders();
-            orders = orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
-            saveOrders(orders);
-            renderDashboard();
-            showToast("تم تحديث حالة الطلب");
-        }
+    function logout() {
+        sessionStorage.removeItem('admin_session');
+        currentUser = null;
+        renderApp();
+    }
 
-        // ---------- استيراد / تصدير Excel ----------
-        function exportProductsToExcel() {
-            const products = getProducts();
-            const worksheet = XLSX.utils.json_to_sheet(products.map(p => ({
-                'الرقم': p.id,
-                'اسم المنتج': p.name,
-                'الفئة': p.category,
-                'السعر (SDG)': p.price,
-                'رابط الصورة': p.image,
-                'بريميوم': p.premium ? 'نعم' : 'لا'
-            })));
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'المنتجات');
-            XLSX.writeFile(workbook, `products_export_${new Date().toISOString().slice(0,19)}.xlsx`);
-            showToast("تم تصدير المنتجات إلى Excel");
-        }
+    function hasPermission(perm) {
+        if (!currentUser) return false;
+        if (currentUser.role === 'super') return true;
+        return currentUser.permissions[perm] === true;
+    }
 
-        function importProductsFromExcel(file, callback) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(sheet);
-                if (!rows.length) { showToast("الملف فارغ"); return; }
-                const newProducts = [];
-                let currentProducts = getProducts();
-                let maxId = currentProducts.length ? Math.max(...currentProducts.map(p => p.id)) : 0;
-                for (const row of rows) {
-                    let premium = false;
-                    if (row['بريميوم'] === 'نعم' || row['بريميوم'] === true || row['premium'] === true) premium = true;
-                    newProducts.push({
-                        id: ++maxId,
-                        name: row['اسم المنتج'] || row['name'] || 'منتج بدون اسم',
-                        category: row['الفئة'] || row['category'] || 'عام',
-                        price: Number(row['السعر (SDG)'] || row['price'] || 0),
-                        image: row['رابط الصورة'] || row['image'] || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400',
-                        premium: premium
-                    });
-                }
-                if (newProducts.length) {
-                    saveProducts([...currentProducts, ...newProducts]);
-                    renderDashboard();
-                    showToast(`تم استيراد ${newProducts.length} منتج بنجاح`);
-                    if (callback) callback();
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+    // ---------- إدارة المنتجات الأساسية ----------
+    function addProduct(product) {
+        const products = getProducts();
+        const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 7;
+        product.id = newId;
+        products.push(product);
+        saveProducts(products);
+        renderDashboard();
+        showToast("تم إضافة المنتج بنجاح");
+    }
 
-        // ---------- واجهة المستخدم (الرندر) ----------
-        let currentTab = 'products';
+    function updateProduct(updated) {
+        let products = getProducts();
+        products = products.map(p => p.id === updated.id ? updated : p);
+        saveProducts(products);
+        renderDashboard();
+        showToast("تم تحديث المنتج");
+    }
 
-        function renderDashboard() {
-            const app = document.getElementById('adminApp');
-            if (!isLoggedIn()) {
-                renderLoginScreen(app);
-                return;
-            }
-            const products = getProducts();
-            const orders = getOrders();
-            const admins = getAdmins();
-            const canManageProducts = hasPermission('products');
-            const canManageOrders = hasPermission('orders');
-            const canManageAdmins = currentUser.role === 'super';
+    function deleteProduct(id) {
+        let products = getProducts();
+        products = products.filter(p => p.id !== id);
+        saveProducts(products);
+        renderDashboard();
+        showToast("تم حذف المنتج");
+    }
 
-            let html = `
-                <div class="admin-container">
-                    <div class="admin-header">
-                        <div class="logo">GAMES <span>STORE</span> | لوحة التحكم</div>
-                        <div class="user-info">
-                            <i class="bi bi-person-circle"></i> ${currentUser.username} (${currentUser.role === 'super' ? 'مدير عام' : 'مشرف'})
-                            <button class="logout-btn" id="logoutBtn">تسجيل خروج <i class="bi bi-box-arrow-right"></i></button>
-                        </div>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><i class="bi bi-cup"></i><h3>${products.length}</h3><p>منتج</p></div>
-                        <div class="stat-card"><i class="bi bi-bag-check"></i><h3>${orders.length}</h3><p>طلبات</p></div>
-                        <div class="stat-card"><i class="bi bi-people"></i><h3>${admins.filter(a=>a.role==='sub').length}</h3><p>مشرفين فرعيين</p></div>
-                    </div>
-                    <div class="action-bar">
-                        <button class="btn-outline ${currentTab === 'products' ? 'active-tab' : ''}" id="tabProductsBtn"><i class="bi bi-grid"></i> إدارة المنتجات</button>
-                        ${canManageOrders ? `<button class="btn-outline ${currentTab === 'orders' ? 'active-tab' : ''}" id="tabOrdersBtn"><i class="bi bi-truck"></i> الطلبات</button>` : ''}
-                        ${canManageAdmins ? `<button class="btn-outline ${currentTab === 'admins' ? 'active-tab' : ''}" id="tabAdminsBtn"><i class="bi bi-shield-lock"></i> المشرفين</button>` : ''}
-                    </div>
-            `;
-            if (currentTab === 'products' && canManageProducts) {
-                html += `
-                    <div class="section-title">المنتجات</div>
-                    <div class="action-bar">
-                        <button id="addProductBtn" class="btn-primary" style="width:auto; padding:8px 24px;"><i class="bi bi-plus-lg"></i> إضافة منتج</button>
-                        <button id="exportExcelBtn" class="btn-outline"><i class="bi bi-download"></i> تصدير Excel</button>
-                        <label class="btn-outline" style="cursor:pointer;"><i class="bi bi-upload"></i> استيراد Excel <input type="file" id="importExcelInput" accept=".xlsx, .xls" style="display:none;"></label>
-                    </div>
-                    <div style="overflow-x:auto;">
-                    <table>
-                        <thead><tr><th>#</th><th>المنتج</th><th>الفئة</th><th>السعر</th><th>بريميوم</th><th>إجراءات</th></tr></thead>
-                        <tbody>
-                            ${products.map(p => `
-                                <tr>
-                                    <td>${p.id}</td>
-                                    <td>${p.name}</td>
-                                    <td>${p.category}</td>
-                                    <td>${p.price.toLocaleString()} SDG</td>
-                                    <td>${p.premium ? 'نعم' : 'لا'}</td>
-                                    <td>
-                                        <button class="btn-icon edit-product" data-id="${p.id}"><i class="bi bi-pencil-square"></i></button>
-                                        <button class="btn-icon delete-product" data-id="${p.id}"><i class="bi bi-trash3"></i></button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    </div>
-                `;
-            } else if (currentTab === 'orders' && canManageOrders) {
-                html += `<div class="section-title">إدارة الطلبات</div><div style="overflow-x:auto;">`;
-                if (orders.length === 0) {
-                    html += `<p style="color:var(--text-secondary);">لا توجد طلبات حتى الآن.</p>`;
-                } else {
-                    html += `<table>
-                        <thead><tr><th>رقم الطلب</th><th>المنتجات</th><th>الإجمالي</th><th>الحالة</th><th>التاريخ</th><th>تحديث</th></tr></thead>
-                        <tbody>
-                            ${orders.map(order => `
-                                <tr>
-                                    <td>#${order.id}</td>
-                                    <td>${order.items.map(i=>i.name).join(', ')}</td>
-                                    <td>${order.total.toLocaleString()} SDG</td>
-                                    <td>
-                                        <select class="order-status" data-id="${order.id}">
-                                            <option value="قيد الانتظار" ${order.status === 'قيد الانتظار' ? 'selected' : ''}>قيد الانتظار</option>
-                                            <option value="تم التأكيد" ${order.status === 'تم التأكيد' ? 'selected' : ''}>تم التأكيد</option>
-                                            <option value="تم التوصيل" ${order.status === 'تم التوصيل' ? 'selected' : ''}>تم التوصيل</option>
-                                        </select>
-                                    </td>
-                                    <td>${new Date(order.createdAt).toLocaleString()}</td>
-                                    <td><button class="btn-icon update-order" data-id="${order.id}"><i class="bi bi-check2-circle"></i></button></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>`;
-                }
-                html += `</div>`;
-            } else if (currentTab === 'admins' && canManageAdmins) {
-                html += `<div class="section-title">المشرفون الفرعيون</div>
-                    <div class="action-bar"><button id="addAdminBtn" class="btn-primary" style="width:auto;"><i class="bi bi-person-plus"></i> إضافة مشرف جديد</button></div>
-                    <table><thead><tr><th>اسم المستخدم</th><th>صلاحية المنتجات</th><th>صلاحية الطلبات</th><th>حذف</th></tr></thead><tbody>
-                        ${admins.filter(a => a.role === 'sub').map(adm => `
-                            <tr>
-                                <td>${adm.username}</td>
-                                <td>${adm.permissions.products ? '✅' : '❌'}</td>
-                                <td>${adm.permissions.orders ? '✅' : '❌'}</td>
-                                <td><button class="btn-icon delete-admin" data-id="${adm.id}"><i class="bi bi-x-circle"></i></button></td>
-                            </tr>
-                        `).join('')}
-                    </tbody></table>`;
-            }
-            html += `</div>`;
-            app.innerHTML = html;
-            attachEvents();
-        }
+    // ---------- إدارة المشرفين الفرعيين ----------
+    function addSubAdmin(username, password, canManageProducts, canManageOrders) {
+        const admins = getAdmins();
+        if (admins.find(a => a.username === username)) { showToast("اسم المستخدم موجود بالفعل"); return false; }
+        const newAdmin = {
+            id: Date.now(),
+            username,
+            password,
+            role: "sub",
+            permissions: { products: canManageProducts, orders: canManageOrders, admins: false }
+        };
+        admins.push(newAdmin);
+        saveAdmins(admins);
+        showToast(`تم إضافة المشرف ${username}`);
+        renderDashboard();
+        return true;
+    }
 
-        function attachEvents() {
-            document.getElementById('logoutBtn')?.addEventListener('click', logout);
-            document.getElementById('tabProductsBtn')?.addEventListener('click', () => { currentTab = 'products'; renderDashboard(); });
-            if (document.getElementById('tabOrdersBtn')) document.getElementById('tabOrdersBtn')?.addEventListener('click', () => { currentTab = 'orders'; renderDashboard(); });
-            if (document.getElementById('tabAdminsBtn')) document.getElementById('tabAdminsBtn')?.addEventListener('click', () => { currentTab = 'admins'; renderDashboard(); });
-            
-            // المنتجات
-            document.getElementById('addProductBtn')?.addEventListener('click', showAddProductModal);
-            document.getElementById('exportExcelBtn')?.addEventListener('click', exportProductsToExcel);
-            const fileInput = document.getElementById('importExcelInput');
-            if (fileInput) fileInput.addEventListener('change', (e) => { if(e.target.files.length) importProductsFromExcel(e.target.files[0], () => { e.target.value = ''; }); });
-            document.querySelectorAll('.edit-product').forEach(btn => btn.addEventListener('click', () => editProduct(parseInt(btn.dataset.id))));
-            document.querySelectorAll('.delete-product').forEach(btn => btn.addEventListener('click', () => { if(confirm('حذف المنتج؟')) deleteProduct(parseInt(btn.dataset.id)); }));
-            
-            // الطلبات
-            document.querySelectorAll('.update-order')?.forEach(btn => btn.addEventListener('click', (e) => {
-                const id = parseInt(btn.dataset.id);
-                const select = document.querySelector(`.order-status[data-id="${id}"]`);
-                if(select) updateOrderStatus(id, select.value);
-            }));
-            
-            // المشرفين
-            document.getElementById('addAdminBtn')?.addEventListener('click', showAddAdminModal);
-            document.querySelectorAll('.delete-admin').forEach(btn => btn.addEventListener('click', () => { if(confirm('حذف هذا المشرف؟')) deleteSubAdmin(parseInt(btn.dataset.id)); }));
-        }
+    function deleteSubAdmin(id) {
+        let admins = getAdmins();
+        const target = admins.find(a => a.id === id);
+        if (target && target.username === masterAdmin.username) { showToast("لا يمكن حذف المشرف الرئيسي"); return; }
+        admins = admins.filter(a => a.id !== id);
+        saveAdmins(admins);
+        renderDashboard();
+        showToast("تم حذف المشرف");
+    }
 
-        // مودالات
-        function showAddProductModal() {
-            const modalHtml = `
-                <div id="productModal" class="modal active">
-                    <div class="modal-content">
-                        <span class="close-modal">&times;</span>
-                        <h3>إضافة منتج جديد</h3>
-                        <input type="text" id="prodName" placeholder="اسم المنتج">
-                        <input type="text" id="prodCategory" placeholder="الفئة">
-                        <input type="number" id="prodPrice" placeholder="السعر (SDG)">
-                        <input type="text" id="prodImage" placeholder="رابط الصورة">
-                        <label><input type="checkbox" id="prodPremium"> منتج بريميوم</label><br><br>
-                        <button id="saveProductBtn" class="btn-primary">حفظ</button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const modal = document.getElementById('productModal');
-            const closeModal = () => modal.remove();
-            modal.querySelector('.close-modal').onclick = closeModal;
-            document.getElementById('saveProductBtn').onclick = () => {
-                const name = document.getElementById('prodName').value;
-                const category = document.getElementById('prodCategory').value;
-                const price = parseFloat(document.getElementById('prodPrice').value);
-                const image = document.getElementById('prodImage').value || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400';
-                const premium = document.getElementById('prodPremium').checked;
-                if (!name || !category || isNaN(price)) { showToast("املأ الحقول بشكل صحيح"); return; }
-                addProduct({ name, category, price, image, premium });
-                closeModal();
-            };
-        }
+    // ---------- الطلبات ----------
+    function updateOrderStatus(orderId, newStatus) {
+        let orders = getOrders();
+        orders = orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
+        saveOrders(orders);
+        renderDashboard();
+        showToast("تم تحديث حالة الطلب");
+    }
 
-        function editProduct(id) {
-            const products = getProducts();
-            const product = products.find(p => p.id === id);
-            if (!product) return;
-            const modalHtml = `
-                <div id="editModal" class="modal active">
-                    <div class="modal-content">
-                        <span class="close-modal">&times;</span>
-                        <h3>تعديل المنتج</h3>
-                        <input type="text" id="editName" value="${product.name.replace(/"/g, '&quot;')}">
-                        <input type="text" id="editCategory" value="${product.category}">
-                        <input type="number" id="editPrice" value="${product.price}">
-                        <input type="text" id="editImage" value="${product.image}">
-                        <label><input type="checkbox" id="editPremium" ${product.premium ? 'checked' : ''}> بريميوم</label><br><br>
-                        <button id="updateProductBtn" class="btn-primary">تحديث</button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const modal = document.getElementById('editModal');
-            const closeModal = () => modal.remove();
-            modal.querySelector('.close-modal').onclick = closeModal;
-            document.getElementById('updateProductBtn').onclick = () => {
-                product.name = document.getElementById('editName').value;
-                product.category = document.getElementById('editCategory').value;
-                product.price = parseFloat(document.getElementById('editPrice').value);
-                product.image = document.getElementById('editImage').value;
-                product.premium = document.getElementById('editPremium').checked;
-                updateProduct(product);
-                closeModal();
-            };
-        }
-
-        function showAddAdminModal() {
-            const modalHtml = `
-                <div id="adminModal" class="modal active">
-                    <div class="modal-content">
-                        <span class="close-modal">&times;</span>
-                        <h3>إضافة مشرف فرعي</h3>
-                        <input type="text" id="subUsername" placeholder="اسم المستخدم">
-                        <input type="password" id="subPassword" placeholder="كلمة المرور">
-                        <label><input type="checkbox" id="permProducts"> إدارة المنتجات</label><br>
-                        <label><input type="checkbox" id="permOrders"> إدارة الطلبات</label><br><br>
-                        <button id="saveAdminBtn" class="btn-primary">إضافة</button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const modal = document.getElementById('adminModal');
-            const closeModal = () => modal.remove();
-            modal.querySelector('.close-modal').onclick = closeModal;
-            document.getElementById('saveAdminBtn').onclick = () => {
-                const user = document.getElementById('subUsername').value.trim();
-                const pass = document.getElementById('subPassword').value;
-                const permProd = document.getElementById('permProducts').checked;
-                const permOrd = document.getElementById('permOrders').checked;
-                if (!user || !pass) { showToast("املأ البيانات"); return; }
-                addSubAdmin(user, pass, permProd, permOrd);
-                closeModal();
-            };
-        }
-
-        function renderLoginScreen(container) {
-            container.innerHTML = `
-                <div class="login-wrapper">
-                    <div class="login-card">
-                        <h2><i class="bi bi-shield-lock"></i> تسجيل الدخول</h2>
-                        <div class="input-group"><input type="text" id="loginUsername" placeholder="اسم المستخدم"></div>
-                        <div class="input-group"><input type="password" id="loginPassword" placeholder="كلمة المرور"></div>
-                        <button id="doLoginBtn" class="btn-primary">دخول</button>
-                    </div>
-                </div>
-            `;
-            document.getElementById('doLoginBtn').addEventListener('click', () => {
-                const username = document.getElementById('loginUsername').value;
-                const password = document.getElementById('loginPassword').value;
-                if (login(username, password)) { renderDashboard(); }
-                else { alert("بيانات الدخول غير صحيحة"); }
+    // ---------- استيراد متعدد الأنواع ----------
+    // دالة مساعدة لاستخراج البيانات من أي ملف (Excel, CSV, JSON)
+    async function parseImportedFile(file) {
+        const fileName = file.name;
+        const extension = fileName.split('.').pop().toLowerCase();
+        
+        // حالة JSON
+        if (extension === 'json') {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        let rows = [];
+                        if (Array.isArray(jsonData)) {
+                            rows = jsonData;
+                        } else if (jsonData.data && Array.isArray(jsonData.data)) {
+                            rows = jsonData.data;
+                        } else {
+                            rows = [jsonData];
+                        }
+                        resolve(rows);
+                    } catch (err) {
+                        reject(new Error("JSON غير صالح: " + err.message));
+                    }
+                };
+                reader.onerror = () => reject(new Error("فشل قراءة ملف JSON"));
+                reader.readAsText(file);
             });
         }
+        
+        // حالة Excel و CSV باستخدام SheetJS
+        else if (['xlsx', 'xls', 'csv'].includes(extension)) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+                        resolve(rows);
+                    } catch (err) {
+                        reject(new Error("فشل قراءة ملف Excel/CSV: " + err.message));
+                    }
+                };
+                reader.onerror = () => reject(new Error("خطأ في تحميل الملف"));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        else {
+            throw new Error("نوع الملف غير مدعوم. استخدم JSON, XLSX, XLS, أو CSV");
+        }
+    }
 
-        function showToast(msg) {
-            let toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerText = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
+    // دالة لتحويل الصفوف المستوردة إلى مصفوفة منتجات
+    function convertImportedRowsToProducts(rows) {
+        // قوائم المرادفات للأعمدة
+        const possibleNameKeys = ['اسم المنتج', 'name', 'المنتج', 'product name', 'product', 'title'];
+        const possibleCatKeys = ['الفئة', 'category', 'فئة', 'cat', 'قسم'];
+        const possiblePriceKeys = ['السعر (SDG)', 'price', 'السعر', 'سعر', 'cost', 'unit_price'];
+        const possibleImageKeys = ['رابط الصورة', 'image', 'صورة', 'image url', 'img', 'photo'];
+        const possiblePremiumKeys = ['بريميوم', 'premium', 'مميز', 'is_premium', 'featured'];
+
+        function getValue(row, possibleKeys) {
+            for (let key of possibleKeys) {
+                if (row.hasOwnProperty(key) && row[key] !== undefined && row[key] !== "") {
+                    return row[key];
+                }
+            }
+            return undefined;
         }
 
-        initStorage();
-        function renderApp() { renderDashboard(); }
-        renderApp();
-    </script>
+        const newProducts = [];
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const name = getValue(row, possibleNameKeys);
+            const category = getValue(row, possibleCatKeys);
+            let price = getValue(row, possiblePriceKeys);
+            const image = getValue(row, possibleImageKeys) || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400';
+            let premiumRaw = getValue(row, possiblePremiumKeys);
+
+            if (!name) {
+                console.warn(`الصف ${i+2} - لا يحتوي على اسم منتج، تم تخطيه.`, row);
+                continue;
+            }
+            if (price === undefined || price === "") {
+                console.warn(`الصف ${i+2} - لا يحتوي على سعر، تم تخطيه.`, row);
+                continue;
+            }
+
+            let numericPrice;
+            if (typeof price === 'number') numericPrice = price;
+            else {
+                let priceStr = String(price).trim();
+                // إزالة أي رموز غير رقمية باستثناء النقطة والعلامة السالبة
+                priceStr = priceStr.replace(/[^0-9.-]/g, '');
+                numericPrice = parseFloat(priceStr);
+            }
+            if (isNaN(numericPrice)) {
+                console.warn(`الصف ${i+2} - السعر غير صالح: "${price}"، تم تخطيه.`);
+                continue;
+            }
+
+            let premium = false;
+            if (premiumRaw !== undefined) {
+                if (typeof premiumRaw === 'boolean') premium = premiumRaw;
+                else if (typeof premiumRaw === 'string') {
+                    const lower = premiumRaw.trim().toLowerCase();
+                    premium = (lower === 'نعم' || lower === 'yes' || lower === 'true' || lower === '1');
+                }
+                else if (typeof premiumRaw === 'number') premium = (premiumRaw === 1);
+            }
+
+            newProducts.push({
+                name: String(name).trim(),
+                category: category ? String(category).trim() : 'عام',
+                price: numericPrice,
+                image: String(image).trim(),
+                premium: premium
+            });
+        }
+        return newProducts;
+    }
+
+    // دالة الاستيراد الرئيسية التي تستخدم المعالج المناسب
+    async function importProductsFromFile(file) {
+        try {
+            showToast("جارٍ قراءة الملف...");
+            const rows = await parseImportedFile(file);
+            if (!rows || rows.length === 0) {
+                showToast("الملف لا يحتوي على بيانات");
+                return false;
+            }
+            const newProductsRaw = convertImportedRowsToProducts(rows);
+            if (newProductsRaw.length === 0) {
+                showToast("لم يتم العثور على منتجات صالحة في الملف. تأكد من وجود أعمدة: اسم المنتج، السعر");
+                return false;
+            }
+            
+            const currentProducts = getProducts();
+            let maxId = currentProducts.length ? Math.max(...currentProducts.map(p => p.id)) : 0;
+            const productsToAdd = newProductsRaw.map(p => ({
+                id: ++maxId,
+                ...p
+            }));
+            
+            saveProducts([...currentProducts, ...productsToAdd]);
+            renderDashboard();
+            showToast(`✅ تم استيراد ${productsToAdd.length} منتج بنجاح من ${file.name}`);
+            return true;
+        } catch (err) {
+            console.error("خطأ في الاستيراد:", err);
+            showToast(`❌ فشل الاستيراد: ${err.message}`);
+            return false;
+        }
+    }
+
+    // تصدير المنتجات إلى Excel (XLSX)
+    function exportProductsToExcel() {
+        const products = getProducts();
+        const worksheet = XLSX.utils.json_to_sheet(products.map(p => ({
+            'الرقم': p.id,
+            'اسم المنتج': p.name,
+            'الفئة': p.category,
+            'السعر (SDG)': p.price,
+            'رابط الصورة': p.image,
+            'بريميوم': p.premium ? 'نعم' : 'لا'
+        })));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'المنتجات');
+        XLSX.writeFile(workbook, `products_export_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+        showToast("تم تصدير المنتجات إلى Excel");
+    }
+
+    // ---------- واجهة المستخدم (الرندر) ----------
+    let currentTab = 'products';
+
+    function renderDashboard() {
+        const app = document.getElementById('adminApp');
+        if (!isLoggedIn()) {
+            renderLoginScreen(app);
+            return;
+        }
+        const products = getProducts();
+        const orders = getOrders();
+        const admins = getAdmins();
+        const canManageProducts = hasPermission('products');
+        const canManageOrders = hasPermission('orders');
+        const canManageAdmins = currentUser.role === 'super';
+
+        let html = `
+            <div class="admin-container">
+                <div class="admin-header">
+                    <div class="logo">GAMES <span>STORE</span> | لوحة التحكم</div>
+                    <div class="user-info">
+                        <i class="bi bi-person-circle"></i> ${currentUser.username} (${currentUser.role === 'super' ? 'مدير عام' : 'مشرف'})
+                        <button class="logout-btn" id="logoutBtn">تسجيل خروج <i class="bi bi-box-arrow-right"></i></button>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><i class="bi bi-cup"></i><h3>${products.length}</h3><p>منتج</p></div>
+                    <div class="stat-card"><i class="bi bi-bag-check"></i><h3>${orders.length}</h3><p>طلبات</p></div>
+                    <div class="stat-card"><i class="bi bi-people"></i><h3>${admins.filter(a=>a.role==='sub').length}</h3><p>مشرفين فرعيين</p></div>
+                </div>
+                <div class="action-bar">
+                    <button class="btn-outline ${currentTab === 'products' ? 'active-tab' : ''}" id="tabProductsBtn"><i class="bi bi-grid"></i> إدارة المنتجات</button>
+                    ${canManageOrders ? `<button class="btn-outline ${currentTab === 'orders' ? 'active-tab' : ''}" id="tabOrdersBtn"><i class="bi bi-truck"></i> الطلبات</button>` : ''}
+                    ${canManageAdmins ? `<button class="btn-outline ${currentTab === 'admins' ? 'active-tab' : ''}" id="tabAdminsBtn"><i class="bi bi-shield-lock"></i> المشرفين</button>` : ''}
+                </div>
+        `;
+        if (currentTab === 'products' && canManageProducts) {
+            html += `
+                <div class="section-title">المنتجات</div>
+                <div class="action-bar">
+                    <button id="addProductBtn" class="btn-primary" style="width:auto; padding:8px 24px;"><i class="bi bi-plus-lg"></i> إضافة منتج</button>
+                    <button id="exportExcelBtn" class="btn-outline"><i class="bi bi-download"></i> تصدير Excel</button>
+                    <label class="btn-outline" style="cursor:pointer;">
+                        <i class="bi bi-upload"></i> استيراد (JSON, Excel, CSV)
+                        <input type="file" id="importFileInput" accept=".xlsx, .xls, .csv, .json" style="display:none;">
+                    </label>
+                    <span class="file-type-badge"><i class="bi bi-filetype-json"></i> .json .xlsx .xls .csv</span>
+                </div>
+                <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr><th>#</th><th>المنتج</th><th>الفئة</th><th>السعر</th><th>بريميوم</th><th>إجراءات</th></tr></thead>
+                    <tbody>
+                        ${products.map(p => `
+                            <tr>
+                                <td>${p.id}</td>
+                                <td>${p.name}</td>
+                                <td>${p.category}</td>
+                                <td>${p.price.toLocaleString()} SDG</td>
+                                <td>${p.premium ? 'نعم' : 'لا'}</td>
+                                <td>
+                                    <button class="btn-icon edit-product" data-id="${p.id}"><i class="bi bi-pencil-square"></i></button>
+                                    <button class="btn-icon delete-product" data-id="${p.id}"><i class="bi bi-trash3"></i></button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                </div>
+            `;
+        } else if (currentTab === 'orders' && canManageOrders) {
+            html += `<div class="section-title">إدارة الطلبات</div><div style="overflow-x:auto;">`;
+            if (orders.length === 0) {
+                html += `<p style="color:var(--text-secondary);">لا توجد طلبات حتى الآن.</p>`;
+            } else {
+                html += `<table>
+                    <thead><tr><th>رقم الطلب</th><th>المنتجات</th><th>الإجمالي</th><th>الحالة</th><th>التاريخ</th><th>تحديث</th></tr></thead>
+                    <tbody>
+                        ${orders.map(order => `
+                            <tr>
+                                <td>#${order.id}</td>
+                                <td>${order.items.map(i=>i.name).join(', ')}</td>
+                                <td>${order.total.toLocaleString()} SDG</td>
+                                <td>
+                                    <select class="order-status" data-id="${order.id}">
+                                        <option value="قيد الانتظار" ${order.status === 'قيد الانتظار' ? 'selected' : ''}>قيد الانتظار</option>
+                                        <option value="تم التأكيد" ${order.status === 'تم التأكيد' ? 'selected' : ''}>تم التأكيد</option>
+                                        <option value="تم التوصيل" ${order.status === 'تم التوصيل' ? 'selected' : ''}>تم التوصيل</option>
+                                    </select>
+                                </td>
+                                <td>${new Date(order.createdAt).toLocaleString()}</td>
+                                <td><button class="btn-icon update-order" data-id="${order.id}"><i class="bi bi-check2-circle"></i></button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+            }
+            html += `</div>`;
+        } else if (currentTab === 'admins' && canManageAdmins) {
+            html += `<div class="section-title">المشرفون الفرعيون</div>
+                <div class="action-bar"><button id="addAdminBtn" class="btn-primary" style="width:auto;"><i class="bi bi-person-plus"></i> إضافة مشرف جديد</button></div>
+                <table><thead><tr><th>اسم المستخدم</th><th>صلاحية المنتجات</th><th>صلاحية الطلبات</th><th>حذف</th></tr></thead><tbody>
+                    ${admins.filter(a => a.role === 'sub').map(adm => `
+                        <tr>
+                            <td>${adm.username}</td>
+                            <td>${adm.permissions.products ? '✅' : '❌'}</td>
+                            <td>${adm.permissions.orders ? '✅' : '❌'}</td>
+                            <td><button class="btn-icon delete-admin" data-id="${adm.id}"><i class="bi bi-x-circle"></i></button></td>
+                        </tr>
+                    `).join('')}
+                </tbody></table>`;
+        }
+        html += `</div>`;
+        app.innerHTML = html;
+        attachEvents();
+    }
+
+    function attachEvents() {
+        document.getElementById('logoutBtn')?.addEventListener('click', logout);
+        document.getElementById('tabProductsBtn')?.addEventListener('click', () => { currentTab = 'products'; renderDashboard(); });
+        if (document.getElementById('tabOrdersBtn')) document.getElementById('tabOrdersBtn')?.addEventListener('click', () => { currentTab = 'orders'; renderDashboard(); });
+        if (document.getElementById('tabAdminsBtn')) document.getElementById('tabAdminsBtn')?.addEventListener('click', () => { currentTab = 'admins'; renderDashboard(); });
+        
+        // المنتجات
+        document.getElementById('addProductBtn')?.addEventListener('click', showAddProductModal);
+        document.getElementById('exportExcelBtn')?.addEventListener('click', exportProductsToExcel);
+        
+        const fileInput = document.getElementById('importFileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', async (e) => {
+                if (e.target.files.length) {
+                    const file = e.target.files[0];
+                    await importProductsFromFile(file);
+                    e.target.value = ''; // إعادة تعيين الإدخال
+                }
+            });
+        }
+        
+        document.querySelectorAll('.edit-product').forEach(btn => btn.addEventListener('click', () => editProduct(parseInt(btn.dataset.id))));
+        document.querySelectorAll('.delete-product').forEach(btn => btn.addEventListener('click', () => { if(confirm('حذف المنتج؟')) deleteProduct(parseInt(btn.dataset.id)); }));
+        
+        // الطلبات
+        document.querySelectorAll('.update-order')?.forEach(btn => btn.addEventListener('click', (e) => {
+            const id = parseInt(btn.dataset.id);
+            const select = document.querySelector(`.order-status[data-id="${id}"]`);
+            if(select) updateOrderStatus(id, select.value);
+        }));
+        
+        // المشرفين
+        document.getElementById('addAdminBtn')?.addEventListener('click', showAddAdminModal);
+        document.querySelectorAll('.delete-admin').forEach(btn => btn.addEventListener('click', () => { if(confirm('حذف هذا المشرف؟')) deleteSubAdmin(parseInt(btn.dataset.id)); }));
+    }
+
+    // مودالات إضافة وتعديل المنتج والمشرفين (كما هي مع بعض التحسينات البسيطة)
+    function showAddProductModal() {
+        const modalHtml = `
+            <div id="productModal" class="modal active">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>إضافة منتج جديد</h3>
+                    <input type="text" id="prodName" placeholder="اسم المنتج">
+                    <input type="text" id="prodCategory" placeholder="الفئة">
+                    <input type="number" id="prodPrice" placeholder="السعر (SDG)">
+                    <input type="text" id="prodImage" placeholder="رابط الصورة">
+                    <label><input type="checkbox" id="prodPremium"> منتج بريميوم</label><br><br>
+                    <button id="saveProductBtn" class="btn-primary">حفظ</button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('productModal');
+        const closeModal = () => modal.remove();
+        modal.querySelector('.close-modal').onclick = closeModal;
+        document.getElementById('saveProductBtn').onclick = () => {
+            const name = document.getElementById('prodName').value;
+            const category = document.getElementById('prodCategory').value;
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const image = document.getElementById('prodImage').value || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400';
+            const premium = document.getElementById('prodPremium').checked;
+            if (!name || !category || isNaN(price)) { showToast("املأ الحقول بشكل صحيح"); return; }
+            addProduct({ name, category, price, image, premium });
+            closeModal();
+        };
+    }
+
+    function editProduct(id) {
+        const products = getProducts();
+        const product = products.find(p => p.id === id);
+        if (!product) return;
+        const modalHtml = `
+            <div id="editModal" class="modal active">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>تعديل المنتج</h3>
+                    <input type="text" id="editName" value="${product.name.replace(/"/g, '&quot;')}">
+                    <input type="text" id="editCategory" value="${product.category}">
+                    <input type="number" id="editPrice" value="${product.price}">
+                    <input type="text" id="editImage" value="${product.image}">
+                    <label><input type="checkbox" id="editPremium" ${product.premium ? 'checked' : ''}> بريميوم</label><br><br>
+                    <button id="updateProductBtn" class="btn-primary">تحديث</button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('editModal');
+        const closeModal = () => modal.remove();
+        modal.querySelector('.close-modal').onclick = closeModal;
+        document.getElementById('updateProductBtn').onclick = () => {
+            product.name = document.getElementById('editName').value;
+            product.category = document.getElementById('editCategory').value;
+            product.price = parseFloat(document.getElementById('editPrice').value);
+            product.image = document.getElementById('editImage').value;
+            product.premium = document.getElementById('editPremium').checked;
+            updateProduct(product);
+            closeModal();
+        };
+    }
+
+    function showAddAdminModal() {
+        const modalHtml = `
+            <div id="adminModal" class="modal active">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>إضافة مشرف فرعي</h3>
+                    <input type="text" id="subUsername" placeholder="اسم المستخدم">
+                    <input type="password" id="subPassword" placeholder="كلمة المرور">
+                    <label><input type="checkbox" id="permProducts"> إدارة المنتجات</label><br>
+                    <label><input type="checkbox" id="permOrders"> إدارة الطلبات</label><br><br>
+                    <button id="saveAdminBtn" class="btn-primary">إضافة</button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('adminModal');
+        const closeModal = () => modal.remove();
+        modal.querySelector('.close-modal').onclick = closeModal;
+        document.getElementById('saveAdminBtn').onclick = () => {
+            const user = document.getElementById('subUsername').value.trim();
+            const pass = document.getElementById('subPassword').value;
+            const permProd = document.getElementById('permProducts').checked;
+            const permOrd = document.getElementById('permOrders').checked;
+            if (!user || !pass) { showToast("املأ البيانات"); return; }
+            addSubAdmin(user, pass, permProd, permOrd);
+            closeModal();
+        };
+    }
+
+    function renderLoginScreen(container) {
+        container.innerHTML = `
+            <div class="login-wrapper">
+                <div class="login-card">
+                    <h2><i class="bi bi-shield-lock"></i> تسجيل الدخول</h2>
+                    <div class="input-group"><input type="text" id="loginUsername" placeholder="اسم المستخدم"></div>
+                    <div class="input-group"><input type="password" id="loginPassword" placeholder="كلمة المرور"></div>
+                    <button id="doLoginBtn" class="btn-primary">دخول</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('doLoginBtn').addEventListener('click', () => {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            if (login(username, password)) { renderDashboard(); }
+            else { alert("بيانات الدخول غير صحيحة"); }
+        });
+    }
+
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // بدء التشغيل
+    initStorage();
+    function renderApp() { renderDashboard(); }
+    renderApp();
+</script>
 </body>
 </html>
