@@ -810,6 +810,89 @@
 <a href="https://wa.me/249115169965" target="_blank" class="whatsapp-float"><i class="bi bi-headset"></i></a>
 
 <script>
+    // === كود التزامن بين نظام الإدارة ومتجر الألعاب ===
+(function syncStoreAndGame() {
+    const ADMIN_KEY = 'advanced_store_data';
+    const GAME_PRODUCTS_KEY = 'games_store_products';
+    const GAME_ORDERS_KEY = 'games_store_orders';
+    const GAME_CART_KEY = 'games_store_cart';
+    
+    // دالة لمزامنة المنتجات من الإدارة إلى الألعاب
+    function syncProductsFromAdmin() {
+        const adminData = localStorage.getItem(ADMIN_KEY);
+        if (adminData) {
+            const parsed = JSON.parse(adminData);
+            if (parsed.products && Array.isArray(parsed.products)) {
+                // تحويل المنتجات إلى صيغة متجر الألعاب
+                const gameProducts = parsed.products.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    category: p.category || 'ألعاب',
+                    price: p.price,
+                    image: p.image?.startsWith('data:') ? p.image : (p.image || 'https://via.placeholder.com/400'),
+                    premium: p.price > 2000
+                }));
+                localStorage.setItem(GAME_PRODUCTS_KEY, JSON.stringify(gameProducts));
+            }
+        }
+    }
+    
+    // دالة لمزامنة الطلبات الجديدة من الألعاب إلى الإدارة
+    function syncOrdersToAdmin() {
+        const gameOrders = localStorage.getItem(GAME_ORDERS_KEY);
+        const adminData = localStorage.getItem(ADMIN_KEY);
+        if (gameOrders && adminData) {
+            const ordersGame = JSON.parse(gameOrders);
+            const admin = JSON.parse(adminData);
+            if (!admin.orders) admin.orders = [];
+            
+            let updated = false;
+            ordersGame.forEach(order => {
+                // تحويل صيغة طلب الألعاب إلى صيغة الإدارة
+                const exists = admin.orders.some(o => o.id === order.id);
+                if (!exists) {
+                    admin.orders.push({
+                        id: order.id,
+                        productId: order.items?.[0]?.id || 0,
+                        quantity: order.items?.reduce((s, i) => s + i.quantity, 0) || 1,
+                        total: order.total,
+                        status: order.status === 'قيد الانتظار' ? 'pending' : 'completed',
+                        date: order.createdAt || new Date().toISOString(),
+                        customer: 'عميل المتجر',
+                        customerId: null,
+                        couponCode: null
+                    });
+                    updated = true;
+                }
+            });
+            if (updated) {
+                localStorage.setItem(ADMIN_KEY, JSON.stringify(admin));
+                // إشعار التحديث لبقية النوافذ
+                window.dispatchEvent(new StorageEvent('storage', { key: ADMIN_KEY, newValue: JSON.stringify(admin) }));
+            }
+        }
+    }
+    
+    // مراقبة التغييرات في localStorage
+    window.addEventListener('storage', (e) => {
+        if (e.key === ADMIN_KEY && e.newValue) {
+            syncProductsFromAdmin();
+        }
+        if (e.key === GAME_ORDERS_KEY && e.newValue) {
+            syncOrdersToAdmin();
+        }
+    });
+    
+    // التنفيذ الأولي
+    syncProductsFromAdmin();
+    syncOrdersToAdmin();
+    
+    // تحديث دوري (اختياري) لتجنب فقدان التغييرات في نفس النافذة
+    setInterval(() => {
+        syncProductsFromAdmin();
+        syncOrdersToAdmin();
+    }, 5000);
+})();
     // ========== مزامنة كاملة مع لوحة التحكم ==========
     const STORAGE_KEYS = {
         PRODUCTS: 'games_store_products',
@@ -1056,4 +1139,4 @@
     updateCartCount();
 </script>
 </body>
-</html>
+    </html> 
