@@ -3,1179 +3,588 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>لوحة التحكم - Black Store</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2 family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #6D001A;
             --accent-color: #fec400;
+            --bg-main: #050505;
+            --bg-card: #111;
+            --bg-input: #0a0a0a;
+            --border-color: #1F1F1F;
+            --text-color: #ffffff;
+            --text-muted: #B5B5B5;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            font-family: 'Cairo', sans-serif;
+            line-height: 1.5;
+            transition: all 0.3s;
         }
         
-        body {
-            background-color: #050505;
-            color: #fff;
-            font-family: 'Cairo', 'Tajawal', 'IBM Plex Sans Arabic', sans-serif;
-            line-height: 1.5;
-            overflow-x: hidden;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        /* تنسيق خاص بالوضع الفاتح عند التبديل */
+        /* تطبيق الوضع الفاتح باستخدام المتغيرات لضمان ثبات الألوان */
         body.light-mode {
-            background-color: #f5f5f7;
-            color: #111;
+            --bg-main: #f5f5f7;
+            --bg-card: #ffffff;
+            --bg-input: #f0f0f2;
+            --border-color: #e0e0e0;
+            --text-color: #111111;
+            --text-muted: #555555;
         }
-        body.light-mode .sidebar, 
-        body.light-mode .stat-card, 
-        body.light-mode #productForm, 
-        body.light-mode .product-item, 
-        body.light-mode .recent-orders-table, 
-        body.light-mode .admin-table,
-        body.light-mode .settings-group,
-        body.light-mode .settings-situation,
-        body.light-mode .settings-language {
-            background: #ffffff;
-            border-color: #e0e0e0;
-            color: #111;
-        }
-        body.light-mode .nav-links button { color: #555; }
-        body.light-mode .nav-links button:hover, body.light-mode .nav-links button.active { color: #000; }
-        body.light-mode #productForm input, body.light-mode .settings-group input { background: #f0f0f2; border-color: #e0e0e0; color: #111; }
-        body.light-mode .recent-orders-table th, body.light-mode .admin-table th { background: #f9f9fa; }
-        body.light-mode .login-box { background: #ffffff; border-color: #e0e0e0; color: #111; }
-        body.light-mode .login-box input { background: #f0f0f2; border-color: #e0e0e0; color: #111; }
-
-        body.ltr-mode {
-            direction: ltr !important;
-        }
-        body.ltr-mode h2 {
-            border-right: none;
-            border-left: 4px solid var(--primary-color);
-            padding-right: 0;
-            padding-left: 10px;
-        }
-        body.ltr-mode .recent-orders-table th, body.ltr-mode .recent-orders-table td,
-        body.ltr-mode .admin-table th, body.ltr-mode .admin-table td {
-            text-align: left;
-        }
-
-        /* واجهة شاشة القفل والحماية */
+        
+        body.ltr-mode { direction: ltr !important; }
         .login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #050505;
+            background: var(--bg-main);
             z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
-        body.light-mode .login-overlay { background: #f5f5f7; }
-        
         .login-box {
-            background: #111;
-            border: 1px solid #1F1F1F;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             padding: 35px;
             border-radius: 20px;
             width: 100%;
             max-width: 420px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: fadeIn 0.5s ease;
         }
-        .login-box i.lock-icon {
-            font-size: 50px;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            display: inline-block;
-        }
-        .login-box h3 { margin-bottom: 25px; font-weight: 700; }
-        .login-box input {
+        .login-box input, #productForm input, .settings-group input {
             width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #1F1F1F;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
             padding: 12px 15px;
             border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            outline: none;
+            color: var(--text-color);
             margin-bottom: 15px;
             font-family: 'Cairo', sans-serif;
-        }
-        .login-box input:focus { border-color: var(--primary-color); }
-        .login-box button {
-            width: 100%;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .sidebar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 30px;
-            flex-wrap: wrap;
-            gap: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            margin-bottom: 30px;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 28px;
-            list-style: none;
-            justify-content: center;
-        }
-
-        .nav-links button {
-            color: #B5B5B5;
-            background: transparent;
-            border: none;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 16px;
-            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            letter-spacing: 0.3px;
-            position: relative;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .nav-links button:hover, .nav-links button.active {
-            color: #fff;
-        }
-
-        .nav-links button::before {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            right: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary-color);
-            transition: width 0.25s ease;
-        }
-
-        .nav-links button:hover::before, .nav-links button.active::before {
-            width: 100%;
-            left: 0;
-            right: auto;
-        }
-        
-        .content section {
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            font-weight: 700;
-            border-right: 4px solid var(--primary-color);
-            padding-right: 10px;
-        }
-
-        .section-header-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        #productForm {
-            display: flex;
-            gap: 10px;
-            background: #111;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            border: 1px solid #1F1F1F;
-            flex-wrap: wrap;
-        }
-
-        #productForm input {
-            flex: 1;
-            min-width: 150px;
-            background: #0a0a0a;
-            border: 1px solid #1F1F1F;
-            padding: 12px 15px;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
             outline: none;
-            font-family: 'Cairo', sans-serif;
         }
-
-        #productForm input:focus {
+        .login-box input:focus, #productForm input:focus, .settings-group input:focus {
             border-color: var(--primary-color);
         }
-        
-        #productForm button, .btn-main {
+        button, .btn-main {
             background: var(--primary-color);
-            opacity: 0.9;
-            border: 1px solid var(--primary-color);
+            border: none;
             color: #fff;
-            font-size: 14px;
-            font-weight: 600;
             padding: 10px 20px;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
             font-family: 'Cairo', sans-serif;
-        }
-
-        #productForm button:hover, .btn-main:hover {
-            opacity: 1;
-            box-shadow: 0 0 10px var(--primary-color);
-        }
-
-        .btn-excel {
-            background: #1D6F42 !important;
-            border-color: #1D6F42 !important;
-        }
-        .btn-excel:hover {
-            background: #155231 !important;
-            box-shadow: 0 0 10px rgba(29,111,66,0.5) !important;
-        }
-
-        .product-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: #111;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border: 1px solid #1F1F1F;
-        }
-
-        .product-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-delete {
-            color: #ff4444;
-            border: 1px solid #ff4444;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            background: transparent;
             transition: 0.3s;
-            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
         }
-
-        .btn-delete:hover {
-            background: #ff4444;
-            color: white;
+        button:hover, .btn-main:hover { opacity: 0.9; box-shadow: 0 0 8px var(--primary-color); }
+        .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .sidebar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 18px 30px; 
+            border-bottom: 1px solid var(--border-color); 
+            margin-bottom: 30px; 
+            flex-wrap: wrap; 
+            background: var(--bg-card);
+            border-radius: 15px;
         }
-
-        .btn-edit {
-            color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            background: transparent;
-            transition: 0.3s;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .btn-edit:hover {
-            background: var(--accent-color);
-            color: black;
-        }
-
-        .btn-status {
-            background: #4CAF50;
-            color: white;
-            border: none;
+        #panelLogo { font-weight: 800; color: var(--primary-color); }
+        .nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap;}
+        .nav-links button { 
+            background: none; 
+            border: none; 
+            color: var(--text-muted); 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 16px; 
             padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-            font-size: 12px;
+            box-shadow: none !important;
         }
+        .nav-links button.active, .nav-links button:hover { color: var(--text-color); border-bottom: 2px solid var(--primary-color); border-radius: 0; }
+        
+        h2 { margin-bottom: 20px; font-weight: 700; border-right: 4px solid var(--primary-color); padding-right: 10px; }
+        body.ltr-mode h2 { border-right: none; border-left: 4px solid var(--primary-color); padding-left: 10px; padding-right: 0; }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: #111;
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid #1F1F1F;
-            text-align: center;
-            transition: 0.3s;
-        }
-
-        .stat-card i {
-            font-size: 30px;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .stat-card h3 { font-size: 16px; color: #B5B5B5; margin-bottom: 10px; }
+        #productForm { display: flex; gap: 10px; background: var(--bg-card); padding: 20px; border-radius: 15px; margin-bottom: 30px; flex-wrap: wrap; border: 1px solid var(--border-color); }
+        #productForm input { margin-bottom: 0; flex: 1; min-width: 150px; }
+        
+        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--bg-card); margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-card { background: var(--bg-card); padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--border-color); }
+        .stat-card i { font-size: 30px; color: var(--primary-color); margin-bottom: 10px; display: inline-block; }
+        .stat-card h3 { font-size: 15px; color: var(--text-muted); margin-bottom: 5px; }
         .stat-card p { font-size: 24px; font-weight: 800; }
 
-        .recent-orders-table, .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #111;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-top: 15px;
-            border: 1px solid #1F1F1F;
-        }
+        .recent-orders-table, .admin-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 15px; overflow: hidden; margin-top: 15px; border: 1px solid var(--border-color); }
+        .recent-orders-table th, .admin-table th { background: var(--bg-input); color: var(--primary-color); padding: 15px; text-align: right; font-weight: 700; }
+        .recent-orders-table td, .admin-table td { padding: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-color); }
+        body.ltr-mode .recent-orders-table th, body.ltr-mode .admin-table th, body.ltr-mode .recent-orders-table td, body.ltr-mode .admin-table td { text-align: left; }
 
-        .recent-orders-table th, .recent-orders-table td,
-        .admin-table th, .admin-table td {
-            padding: 15px;
-            text-align: right;
-            border-bottom: 1px solid #1F1F1F;
-        }
-
-        .recent-orders-table th, .admin-table th {
-            color: var(--primary-color);
-            font-weight: 800;
-            background: #0a0a0a;
-        }
-
-        .settings-group, .settings-situation, .settings-language {
-            background: #111;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 15px;
-            border: 1px solid #1F1F1F;
-            margin-bottom: 20px;
-        }
-        .settings-group label, .settings-situation label, .settings-language label {
-            display: block;
-            color: #B5B5B5;
-        }
-        .settings-group input {
-            width: 100%;
-            max-width: 400px;
-            background: #0a0a0a;
-            border: 1px solid #1F1F1F;
-            padding: 12px;
-            border-radius: 8px;
-            color: white;
-            outline: none;
-        }
+        .settings-group, .settings-situation, .settings-language { background: var(--bg-card); padding: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; border: 1px solid var(--border-color); }
+        .settings-group label, .settings-situation label, .settings-language label { color: var(--text-muted); font-weight: 600; }
+        .settings-group input { width: 100%; max-width: 350px; margin-bottom: 0; }
+        .settings-group input[type="color"] { width: 60px; padding: 2px; height: 40px; cursor: pointer; }
         
-        .settings-group input[type="color"] {
-            width: 60px;
-            height: 40px;
-            padding: 2px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .file-upload-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        .file-upload-wrapper input[type="file"] {
-            position: absolute;
-            left: 0; top: 0; opacity: 0;
-            width: 100%; height: 100%;
-            cursor: pointer;
-        }
+        .file-upload-wrapper { position: relative; display: inline-block; }
+        .file-upload-wrapper input { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content section { animation: fadeIn 0.4s ease; }
+        
+        .btn-excel { background: #1D6F42 !important; }
+        .btn-delete { color: #ff4444; border: 1px solid #ff4444; background: transparent; padding: 6px 12px; font-size: 14px; }
+        .btn-delete:hover { background: #ff4444; color: #fff; }
+        .btn-edit { color: var(--accent-color); border: 1px solid var(--accent-color); background: transparent; padding: 6px 12px; font-size: 14px; margin-left: 5px; }
+        .btn-edit:hover { background: var(--accent-color); color: #000; }
+        .btn-status { background: #4CAF50; color: #white; font-size: 13px; padding: 6px 12px; }
     </style>
 </head>
 <body>
-
-<div class="login-overlay" id="loginOverlay" style="display: none;">
+<div class="login-overlay" id="loginOverlay">
     <div class="login-box">
-        <i class="bi bi-shield-lock-fill lock-icon"></i>
-        <h3 id="loginBoxTitle" data-i18n="loginTitle">تسجيل دخول المسؤول</h3>
+        <i class="bi bi-shield-lock-fill lock-icon" style="font-size: 50px; color: var(--primary-color);"></i>
+        <h3 style="margin-bottom: 20px;">تسجيل دخول المسؤول</h3>
         <input type="text" id="loginUser" placeholder="اسم المستخدم">
         <input type="password" id="loginPass" placeholder="كلمة المرور">
-        <button class="btn-main" onclick="handleLogin()"><i class="bi bi-box-arrow-in-right"></i> <span data-i18n="btnLogin">دخول للوحة</span></button>
+        <button style="width: 100%; margin-top: 10px;" onclick="handleLogin()">دخول للوحة</button>
     </div>
 </div>
-
-<div class="admin-container" id="mainAdminPanel">
+<div class="admin-container" id="mainAdminPanel" style="opacity:0; pointer-events:none; transition: opacity 0.5s;">
     <aside class="sidebar">
         <h3 id="panelLogo">لوحة المسؤول</h3>
         <nav class="nav-links">
-            <button onclick="showSection('home', event)" class="active" data-i18n="navHome">الرئيسية</button>
-            <button onclick="showSection('products', event)" data-i18n="navProducts">المنتجات</button>
-            <button onclick="showSection('orders', event)" data-i18n="navOrders">الطلبات</button>
-            <button onclick="showSection('statistics', event)" data-i18n="navStats">إحصائيات</button>
-            <button onclick="showSection('customers', event)" data-i18n="navCustomers">العملاء</button>
-            <button onclick="showSection('settings', event)" data-i18n="navSettings">الإعدادات</button>
+            <button onclick="showSection('home', event)" class="active">الرئيسية</button>
+            <button onclick="showSection('products', event)">المنتجات</button>
+            <button onclick="showSection('orders', event)">الطلبات</button>
+            <button onclick="showSection('statistics', event)">إحصائيات</button>
+            <button onclick="showSection('customers', event)">العملاء</button>
+            <button onclick="showSection('settings', event)">الإعدادات</button>
         </nav>
     </aside>
-
     <main class="content">
         <section id="home">
-            <h2 data-i18n="homeTitle">لوحة التحكم الرئيسية</h2>
+            <h2>لوحة التحكم الرئيسية</h2>
             <div class="dashboard-grid">
-                <div class="stat-card">
-                    <i class="bi bi-cart-check"></i>
-                    <h3 data-i18n="cardTotalOrders">إجمالي الطلبات</h3>
-                    <p id="totalOrders">0</p>
-                </div>
-                <div class="stat-card">
-                    <i class="bi bi-wallet2"></i>
-                    <h3 data-i18n="cardTotalRevenue">إجمالي المبيعات</h3>
-                    <p id="totalRevenue">0 SDG</p>
-                </div>
-                <div class="stat-card">
-                    <i class="bi bi-box-seam"></i>
-                    <h3 data-i18n="cardTotalProducts">عدد المنتجات</h3>
-                    <p id="totalProducts">0</p>
-                </div>
+                <div class="stat-card"><i class="bi bi-cart-check"></i><h3>إجمالي الطلبات</h3><p id="totalOrders">0</p></div>
+                <div class="stat-card"><i class="bi bi-wallet2"></i><h3>إجمالي المبيعات</h3><p id="totalRevenue">0 SDG</p></div>
+                <div class="stat-card"><i class="bi bi-box-seam"></i><h3>عدد المنتجات</h3><p id="totalProducts">0</p></div>
             </div>
-            
-            <div style="margin-top: 40px;">
-                <h3 data-i18n="homeRecentOrders">أحدث 5 طلبات</h3>
-                <table class="recent-orders-table">
-                    <thead>
-                        <tr>
-                            <th data-i18n="thOrderId">رقم الطلب</th>
-                            <th data-i18n="thCustomerName">العميل</th>
-                            <th data-i18n="thTotal">الإجمالي</th>
-                            <th data-i18n="thStatus">الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentOrdersBody"></tbody>
-                </table>
-            </div>
+            <div style="margin-top:40px"><h3>أحدث 5 طلبات</h3><table class="recent-orders-table"><thead><tr><th>رقم الطلب</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th></tr></thead><tbody id="recentOrdersBody"></tbody></table></div>
         </section>
-
         <section id="products" style="display:none;">
-            <h2 data-i18n="productsTitle">إدارة المنتجات</h2>
+            <h2>إدارة المنتجات</h2>
             <form id="productForm" onsubmit="handleProductSubmit(event)">
                 <input type="hidden" id="pId">
                 <input type="text" id="pName" placeholder="اسم المنتج" required>
                 <input type="number" id="pPrice" placeholder="السعر" required>
                 <input type="text" id="pCategory" placeholder="الفئة" required>
-                <button type="submit" id="formSubmitBtn"><i class="bi bi-plus-circle"></i> <span data-i18n="btnSaveProduct">حفظ المنتج</span></button>
+                <button type="submit" id="formSubmitBtn">حفظ المنتج</button>
             </form>
             <div id="adminProductList"></div>
         </section>
-
         <section id="orders" style="display:none;">
-            <div class="section-header-box">
-                <h2 data-i18n="ordersTitle">إدارة الطلبات الجديدة والمستلمة</h2>
-                <button class="btn-main btn-excel" onclick="exportTableToExcel('adminOrdersContainerTable', 'orders')"><i class="bi bi-file-earmark-excel"></i> <span data-i18n="btnExportExcel">تصدير Excel</span></button>
-            </div>
-            <table class="admin-table" id="adminOrdersContainerTable">
-                <thead>
-                    <tr>
-                        <th data-i18n="thOrderId">رقم الطلب</th>
-                        <th data-i18n="thCustomerName">اسم العميل</th>
-                        <th data-i18n="thPhone">الهاتف</th>
-                        <th data-i18n="thTotal">الإجمالي</th>
-                        <th data-i18n="thStatus">الحالة</th>
-                        <th data-i18n="thActions">إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="adminOrdersContainer"></tbody>
-            </table>
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px"><h2>إدارة الطلبات</h2><button class="btn-excel" onclick="exportTableToExcel('adminOrdersContainerTable','orders')">تصدير Excel</button></div>
+            <table class="admin-table" id="adminOrdersContainerTable"><thead><tr><th>رقم الطلب</th><th>اسم العميل</th><th>الهاتف</th><th>الإجمالي</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="adminOrdersContainer"></tbody></table>
         </section>
-        
-        <section id="statistics" style="display:none;">
-            <h2 data-i18n="statsTitle">الإحصائيات والتقارير العامة</h2>
-            <div class="dashboard-grid" id="adminStatsContainer"></div>
-        </section>
-        
-        <section id="customers" style="display:none;">
-            <div class="section-header-box">
-                <h2 data-i18n="customersTitle">قائمة العملاء المسجلين</h2>
-                <button class="btn-main btn-excel" onclick="exportTableToExcel('adminCustomersListTable', 'customers')"><i class="bi bi-file-earmark-excel"></i> <span data-i18n="btnExportExcel">تصدير Excel</span></button>
-            </div>
-            <table class="admin-table" id="adminCustomersListTable">
-                <thead>
-                    <tr>
-                        <th data-i18n="thCustomerName">اسم العميل</th>
-                        <th data-i18n="thContact">البريد الإلكتروني / الهاتف</th>
-                        <th data-i18n="thOrdersCount">عدد الطلبات</th>
-                    </tr>
-                </thead>
-                <tbody id="adminCustomersList"></tbody>
-            </table>
-        </section>
-             
+        <section id="statistics" style="display:none;"><h2>الإحصائيات والتقارير العامة</h2><div class="dashboard-grid" id="adminStatsContainer"></div></section>
+        <section id="customers" style="display:none;"><div style="display:flex; justify-content:space-between"><h2>قائمة العملاء المسجلين</h2><button class="btn-excel" onclick="exportTableToExcel('adminCustomersListTable','customers')">تصدير Excel</button></div><table class="admin-table" id="adminCustomersListTable"><thead><tr><th>اسم العميل</th><th>البريد / الهاتف</th><th>عدد الطلبات</th></tr></thead><tbody id="adminCustomersList"></tbody></table></section>
         <section id="settings" style="display:none;">
-            <h2 data-i18n="settingsTitle">إعدادات المتجر العامة</h2>
-            <div id="adminSettingsPanel">
-                <div class="settings-group">
-                    <label data-i18n="lblStoreName">اسم المتجر</label>
-                    <input type="text" id="storeNameSetting" value="Black Store">
-                </div>
-                <div class="settings-group">
-                    <label data-i18n="lblCurrency">العملة الافتراضية</label>
-                    <input type="text" id="storeCurrencySetting" value="SDG">
-                </div>
-                
-                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid var(--accent-color); padding-right: 10px;" data-i18n="themeCustomizerTitle">تخصيص ألوان الهوية والواجهة</h3>
-                <div class="settings-group">
-                    <label data-i18n="lblPrimaryColor">اللون الرئيسي للمتجر (أزرار وحدود)</label>
-                    <input type="color" id="primaryColorSetting" value="#6D001A">
-                </div>
-                <div class="settings-group">
-                    <label data-i18n="lblAccentColor">اللون الثانوي التفاعلي (الأسعار والتعديل)</label>
-                    <input type="color" id="accentColorSetting" value="#fec400">
-                </div>
-
-                <div class="settings-situation">
-                    <label data-i18n="lblTheme">المظهر المفضل</label>
-                    <button id="themeToggle" class="btn-main" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i> <span>الوضع الداكن</span></button>
-                </div>
-                <div class="settings-language">
-                    <label data-i18n="lblLang">اللغة المفضلة</label>
-                    <button id="langToggle" class="btn-main" onclick="toggleLanguage()"><i class="bi bi-translate"></i> <span>العربية</span></button>
-                </div>
-                
-                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid var(--primary-color); padding-right: 10px;" data-i18n="securityTitle">إدارة الأمان والوصول للوحة</h3>
-                <div class="settings-situation" style="margin-bottom: 15px;">
-                    <label data-i18n="lblSecurityStatus">حالة الحماية البرمجية</label>
-                    <button id="securityToggle" class="btn-main" onclick="toggleSecuritySystem()"><i class="bi bi-shield-fill-check"></i> <span>مفعلة</span></button>
-                </div>
-                <div class="settings-group">
-                    <label data-i18n="lblAdminUser">اسم مستخدم المسؤول</label>
-                    <input type="text" id="adminUserSetting" value="admin">
-                </div>
-                <div class="settings-group">
-                    <label data-i18n="lblAdminPass">كلمة مرور المسؤول</label>
-                    <input type="password" id="adminPassSetting" value="1234">
-                </div>
-
-                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid var(--accent-color); padding-right: 10px;" data-i18n="backupTitle">النسخ الاحتياطي والبيانات (JSON)</h3>
-                <div class="settings-group" style="display: flex; gap: 15px; justify-content: flex-start; flex-wrap: wrap;">
-                    <button class="btn-main" style="background:#333; border-color:#444;" onclick="exportStoreJSON()"><i class="bi bi-download"></i> <span data-i18n="btnExportJson">تصدير كافة البيانات (JSON)</span></button>
-                    <div class="file-upload-wrapper">
-                        <button class="btn-main" style="background:var(--primary-color); border-color:var(--primary-color);"><i class="bi bi-upload"></i> <span data-i18n="btnImportJson">استيراد بيانات المتجر (JSON)</span></button>
-                        <input type="file" id="importJsonInput" accept=".json" onchange="importStoreJSON(event)">
-                    </div>
-                </div>
-
-                <button class="btn-main" style="margin-top: 20px; width: 100%; justify-content: center; font-size:16px;" onclick="saveSettings()"><i class="bi bi-floppy"></i> <span data-i18n="btnSaveGeneralSettings">حفظ التعديلات العامة</span></button>
-            </div>
+            <h2>الإعدادات العامة للمتجر</h2>
+            <div class="settings-group"><label>اسم المتجر</label><input type="text" id="storeNameSetting" value="Black Store"></div>
+            <div class="settings-group"><label>العملة الافتراضية</label><input type="text" id="storeCurrencySetting" value="SDG"></div>
+            <div class="settings-group"><label>اللون الرئيسي للمتجر</label><input type="color" id="primaryColorSetting" value="#6D001A"></div>
+            <div class="settings-group"><label>اللون الثانوي التفاعلي</label><input type="color" id="accentColorSetting" value="#fec400"></div>
+            <div class="settings-situation"><label>المظهر المفضل</label><button id="themeToggle" onclick="toggleTheme()">الوضع الداكن</button></div>
+            <div class="settings-language"><label>اللغة الافتراضية</label><button id="langToggle" onclick="toggleLanguage()">العربية</button></div>
+            <div class="settings-situation"><label>حماية دخول اللوحة</label><button id="securityToggle" onclick="toggleSecuritySystem()">مفعلة</button></div>
+            <div class="settings-group"><label>اسم مستخدم المسؤول</label><input type="text" id="adminUserSetting" value="admin"></div>
+            <div class="settings-group"><label>كلمة مرور المسؤول</label><input type="password" id="adminPassSetting" value="1234"></div>
+            <div class="settings-group" style="gap:15px; justify-content: flex-start;"><button class="btn-main" style="background:#333;" onclick="exportStoreJSON()">تصدير نسخة احتياطية (JSON)</button><div class="file-upload-wrapper"><button class="btn-main">استيراد بيانات (JSON)</button><input type="file" id="importJsonInput" accept=".json" onchange="importStoreJSON(event)"></div></div>
+            <button style="width:100%; margin-top:20px; font-size: 16px;" onclick="saveSettings()">حفظ كافة التعديلات</button>
         </section>
     </main>
 </div>
-
 <script>
-const STORAGE_KEYS = {
-    PRODUCTS: 'games_store_products',
-    ORDERS: 'games_store_orders',
-    SETTINGS: 'games_store_settings',
-    SECURITY: 'games_store_security'
-};
+    const STORAGE_KEYS = {
+        PRODUCTS: 'games_store_products',
+        ORDERS: 'games_store_orders',
+        SETTINGS: 'games_store_settings',
+        SECURITY: 'games_store_security'
+    };
 
-const LANGUAGES = {
-    ar: {
-        navHome: "الرئيسية", navProducts: "المنتجات", navOrders: "الطلبات", navStats: "إحصائيات", navCustomers: "العملاء", navSettings: "الإعدادات",
-        homeTitle: "لوحة التحكم الرئيسية", cardTotalOrders: "إجمالي الطلبات", cardTotalRevenue: "إجمالي المبيعات", cardTotalProducts: "عدد المنتجات",
-        homeRecentOrders: "أحدث 5 طلبات", thOrderId: "رقم الطلب", thCustomerName: "العميل", thTotal: "الإجمالي", thStatus: "الحالة",
-        productsTitle: "إدارة المنتجات", btnSaveProduct: "حفظ المنتج", btnUpdateProduct: "تحديث المنتج الحالي",
-        ordersTitle: "إدارة الطلبات الجديدة والمستلمة", btnExportExcel: "تصدير Excel", thPhone: "الهاتف", thActions: "إجراءات",
-        statsTitle: "الإحصائيات والتقارير العامة", customersTitle: "قائمة العملاء المسجلين", thContact: "البريد الإلكتروني / الهاتف", thOrdersCount: "عدد الطلبات",
-        settingsTitle: "إعدادات المتجر العامة", lblStoreName: "اسم المتجر", lblCurrency: "العملة الافتراضية", lblTheme: "المظهر المفضل", lblLang: "اللغة المفضلة",
-        themeCustomizerTitle: "تخصيص ألوان الهوية والواجهة", lblPrimaryColor: "اللون الرئيسي للمتجر (أزرار وحدود)", lblAccentColor: "اللون الثانوي التفاعلي (الأسعار والتعديل)",
-        securityTitle: "إدارة الأمان والوصول للوحة", lblSecurityStatus: "حالة الحماية البرمجية", lblAdminUser: "اسم مستخدم المسؤول", lblAdminPass: "كلمة مرور المسؤول",
-        backupTitle: "النسخ الاحتياطي والبيانات (JSON)", btnExportJson: "تصدير كافة البيانات (JSON)", btnImportJson: "استيراد بيانات المتجر (JSON)",
-        btnSaveGeneralSettings: "حفظ التعديلات العامة", statusCompleted: "مكتمل", statusPending: "قيد الانتظار", statusDelivered: "تم تسليمه",
-        btnMarkComplete: "تعديل كمكتمل", txtNoProducts: "لا توجد منتجات حالياً.", txtNoOrders: "لا توجد طلبات مسجلة.", txtNoCustomers: "لا يوجد عملاء مسجلين.",
-        statCardCompleted: "الطلبات المكتملة", statCardPending: "الطلبات قيد الانتظار", statCardAvg: "متوسط قيمة الطلب",
-        msgProductUpdated: "تم تحديث بيانات المنتج بنجاح!", msgProductAdded: "تم إضافة المنتج بنجاح!", msgConfirmDeleteProduct: "هل أنت متأكد من حذف هذا المنتج نهائياً؟",
-        msgConfirmImport: "تنبيه: سيقوم الاستيراد الحالي بدمج واستبدال بيانات لوحة التحكم الحالية بالملف المرفوع. هل تريد الاستمرار؟",
-        msgImportSuccess: "تم استيراد كافة البيانات بنجاح والمزامنة فوراً!", msgImportError: "صيغة الملف غير صحيحة، تأكد من اختيار ملف مخرجات اللوحة الصحيح.",
-        msgJsonReadError: "حدث خطأ أثناء قراءة وتحليل ملف JSON المرفوع.", msgSettingsSaved: "تم حفظ الإعدادات وتحديث اللوحة بنجاح!",
-        btnEdit: "تعديل", btnDelete: "حذف", txtCategory: "الفئة: ", txtOrderCountText: "طلب(ات)", panelDefaultTitle: "لوحة المسؤول",
-        themeDark: "الوضع الداكن", themeLight: "الوضع الفاتح", loginTitle: "تسجيل دخول المسؤول", btnLogin: "دخول للوحة",
-        securityEnabled: "مفعلة", securityDisabled: "معطلة", msgLoginError: "اسم المستخدم أو كلمة المرور غير صحيحة!"
-    },
-    en: {
-        navHome: "Dashboard", navProducts: "Products", navOrders: "Orders", navStats: "Statistics", navCustomers: "Customers", navSettings: "Settings",
-        homeTitle: "Main Dashboard", cardTotalOrders: "Total Orders", cardTotalRevenue: "Total Revenue", cardTotalProducts: "Total Products",
-        homeRecentOrders: "Latest 5 Orders", thOrderId: "Order ID", thCustomerName: "Customer", thTotal: "Total", thStatus: "Status",
-        productsTitle: "Product Management", btnSaveProduct: "Save Product", btnUpdateProduct: "Update Product",
-        ordersTitle: "Manage New & Received Orders", btnExportExcel: "Export Excel", thPhone: "Phone", thActions: "Actions",
-        statsTitle: "General Statistics & Reports", customersTitle: "Registered Customers List", thContact: "Email / Phone", thOrdersCount: "Orders Count",
-        settingsTitle: "General Store Settings", lblStoreName: "Store Name", lblCurrency: "Default Currency", lblTheme: "Preferred Theme", lblLang: "Preferred Language",
-        themeCustomizerTitle: "Identity & Interface Colors", lblPrimaryColor: "Primary Store Color (Buttons & Borders)", lblAccentColor: "Secondary Active Color (Prices & Edit)",
-        securityTitle: "Security & Access Control", lblSecurityStatus: "Security System Status", lblAdminUser: "Admin Username", lblAdminPass: "Admin Password",
-        backupTitle: "Backup & Data (JSON)", btnExportJson: "Export All Data (JSON)", btnImportJson: "Import Store Data (JSON)",
-        btnSaveGeneralSettings: "Save General Settings", statusCompleted: "Completed", statusPending: "Pending", statusDelivered: "Delivered",
-        btnMarkComplete: "Mark Complete", txtNoProducts: "No products available currently.", txtNoOrders: "No orders registered.", txtNoCustomers: "No registered customers.",
-        statCardCompleted: "Completed Orders", statCardPending: "Pending Orders", statCardAvg: "Average Order Value",
-        msgProductUpdated: "Product updated successfully!", msgProductAdded: "Product added successfully!", msgConfirmDeleteProduct: "Are you sure you want to delete this product permanently?",
-        msgConfirmImport: "Warning: This import will overwrite your current dashboard data. Do you want to continue?",
-        msgImportSuccess: "All data imported successfully and synchronized!", msgImportError: "Invalid file format. Make sure you select the correct dashboard JSON file.",
-        msgJsonReadError: "An error occurred while reading and analyzing the uploaded JSON file.", msgSettingsSaved: "Settings saved and dashboard updated successfully!",
-        btnEdit: "Edit", btnDelete: "Delete", txtCategory: "Category: ", txtOrderCountText: "order(s)", panelDefaultTitle: "Admin Panel",
-        themeDark: "Dark Mode", themeLight: "Light Mode", loginTitle: "Admin Secure Login", btnLogin: "Login to Dashboard",
-        securityEnabled: "Enabled", securityDisabled: "Disabled", msgLoginError: "Invalid Username or Password!"
+    let currentCurrency = 'SDG';
+    let currentLang = 'ar';
+
+    function initData() {
+        if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify([
+                { id: 101, name: "PlayStation 5 Pro", price: 650000, category: "أجهزة" },
+                { id: 102, name: "GTA VI", price: 60000, category: "ألعاب" },
+                { id: 103, name: "شحن 1000 جوهرة", price: 5000, category: "بطاقات رقمية" }
+            ]));
+        }
+        if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([
+                { id: 5001, customerName: "أحمد علي", phone: "0912345678", total: 650000, status: "pending" },
+                { id: 5002, customerName: "محمد مصطفى", phone: "0123456789", total: 60000, status: "completed" }
+            ]));
+        }
+        if (!localStorage.getItem(STORAGE_KEYS.SECURITY)) {
+            localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify({ enabled: true, user: "admin", pass: "1234" }));
+        }
+        if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
+            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify({ storeName: "Black Store", currency: "SDG", theme: "dark", lang: "ar", primaryColor: "#6D001A", accentColor: "#fec400" }));
+        }
     }
-};
 
-let currentCurrency = 'SDG';
-let currentLang = 'ar';
-
-function initializeDemoData() {
-    if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
-        const demoProducts = [
-            { id: 101, name: "PlayStation 5 Pro", price: 650000, category: "أجهزة" },
-            { id: 102, name: "GTA VI", price: 60000, category: "ألعاب" },
-            { id: 103, name: "شحن 1000 جوهرة", price: 5000, category: "بطاقات رقمية" }
-        ];
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(demoProducts));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
-        const demoOrders = [
-            { id: 5001, customerName: "أحمد علي", phone: "0912345678", total: 650000, status: "pending" },
-            { id: 5002, customerName: "محمد مصطفى", phone: "0123456789", total: 60000, status: "completed" }
-        ];
-        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(demoOrders));
-    }
-    // تهيئة بيانات الحماية الافتراضية
-    if (!localStorage.getItem(STORAGE_KEYS.SECURITY)) {
-        const defaultSecurity = { enabled: true, user: "admin", pass: "1234" };
-        localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify(defaultSecurity));
-    }
-}
-
-// دالة فحص وتطبيق نظام الحماية عند فتح الصفحة
-function checkSecurityAccess() {
-    const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
-    const overlay = document.getElementById('loginOverlay');
-    const panel = document.getElementById('mainAdminPanel');
-    
-    if (security && security.enabled) {
-        overlay.style.display = 'flex';
-        panel.style.opacity = '0'; 
-        panel.style.pointerEvents = 'none';
-    } else {
-        overlay.style.display = 'none';
-        panel.style.opacity = '1';
-        panel.style.pointerEvents = 'auto';
-    }
-}
-
-function handleLogin() {
-    const userInp = document.getElementById('loginUser').value;
-    const passInp = document.getElementById('loginPass').value;
-    const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
-    const t = LANGUAGES[currentLang];
-
-    if (userInp === security.user && passInp === security.pass) {
-        document.getElementById('loginOverlay').style.display = 'none';
+    function checkSecurityAccess() {
+        const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
+        const overlay = document.getElementById('loginOverlay');
         const panel = document.getElementById('mainAdminPanel');
-        panel.style.opacity = '1';
-        panel.style.pointerEvents = 'auto';
-        document.getElementById('loginUser').value = '';
-        document.getElementById('loginPass').value = '';
-    } else {
-        alert(t.msgLoginError);
-    }
-}
-
-function showSection(sectionId, event) {
-    document.querySelectorAll('main > section').forEach(section => {
-        section.style.display = 'none';
-    });
-    
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.style.display = 'block';
+        if (security && security.enabled) {
+            overlay.style.display = 'flex';
+            panel.style.opacity = '0';
+            panel.style.pointerEvents = 'none';
+        } else {
+            overlay.style.display = 'none';
+            panel.style.opacity = '1';
+            panel.style.pointerEvents = 'auto';
+        }
     }
 
-    if (event && event.currentTarget) {
-        document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    function handleLogin() {
+        const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
+        const user = document.getElementById('loginUser').value;
+        const pass = document.getElementById('loginPass').value;
+        if (user === security.user && pass === security.pass) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            const panel = document.getElementById('mainAdminPanel');
+            panel.style.opacity = '1';
+            panel.style.pointerEvents = 'auto';
+        } else {
+            alert("اسم المستخدم أو كلمة المرور غير صحيحة!");
+        }
     }
-}
 
-function applyTranslations() {
-    const t = LANGUAGES[currentLang];
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[key]) {
-            const icon = el.querySelector('i');
-            if (icon) {
-                el.innerHTML = icon.outerHTML + ' ' + `<span>${t[key]}</span>`;
+    function showSection(sectionId, event) {
+        document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
+        document.getElementById(sectionId).style.display = 'block';
+        if (event && event.currentTarget) {
+            document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+    }
+
+    function applyCustomColors(primary, accent) {
+        document.documentElement.style.setProperty('--primary-color', primary || '#6D001A');
+        document.documentElement.style.setProperty('--accent-color', accent || '#fec400');
+    }
+
+    function loadSettings() {
+        const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS));
+        const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
+        if (settings) {
+            document.getElementById('storeNameSetting').value = settings.storeName;
+            document.getElementById('storeCurrencySetting').value = settings.currency;
+            document.getElementById('panelLogo').innerText = settings.storeName;
+            document.getElementById('primaryColorSetting').value = settings.primaryColor;
+            document.getElementById('accentColorSetting').value = settings.accentColor;
+            currentCurrency = settings.currency;
+            currentLang = settings.lang;
+            applyCustomColors(settings.primaryColor, settings.accentColor);
+            
+            const themeBtn = document.getElementById('themeToggle');
+            if (settings.theme === 'light') {
+                document.body.classList.add('light-mode');
+                themeBtn.innerText = "الوضع الفاتح";
             } else {
-                el.innerText = t[key];
+                document.body.classList.remove('light-mode');
+                themeBtn.innerText = "الوضع الداكن";
+            }
+            
+            const langBtn = document.getElementById('langToggle');
+            if(currentLang === 'en') {
+                langBtn.innerText = "English";
+                document.body.classList.add('ltr-mode');
+            } else {
+                langBtn.innerText = "العربية";
+                document.body.classList.remove('ltr-mode');
             }
         }
-    });
-
-    if (currentLang === 'en') {
-        document.getElementById('pName').placeholder = "Product Name";
-        document.getElementById('pPrice').placeholder = "Price";
-        document.getElementById('pCategory').placeholder = "Category";
-        document.getElementById('loginUser').placeholder = "Username";
-        document.getElementById('loginPass').placeholder = "Password";
-        document.body.classList.add('ltr-mode');
-        document.documentElement.dir = "ltr";
-        document.documentElement.lang = "en";
-    } else {
-        document.getElementById('pName').placeholder = "اسم المنتج";
-        document.getElementById('pPrice').placeholder = "السعر";
-        document.getElementById('pCategory').placeholder = "الفئة";
-        document.getElementById('loginUser').placeholder = "اسم المستخدم";
-        document.getElementById('loginPass').placeholder = "كلمة المرور";
-        document.body.classList.remove('ltr-mode');
-        document.documentElement.dir = "rtl";
-        document.documentElement.lang = "ar";
+        if (security) {
+            document.getElementById('adminUserSetting').value = security.user;
+            document.getElementById('adminPassSetting').value = security.pass;
+            updateSecurityToggleButton(security.enabled);
+        }
     }
-}
 
-function applyCustomColors(primary, accent) {
-    document.documentElement.style.setProperty('--primary-color', primary || '#6D001A');
-    document.documentElement.style.setProperty('--accent-color', accent || '#fec400');
-}
+    function toggleTheme() {
+        const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS));
+        const themeBtn = document.getElementById('themeToggle');
+        if (document.body.classList.contains('light-mode')) {
+            document.body.classList.remove('light-mode');
+            settings.theme = 'dark';
+            themeBtn.innerText = "الوضع الداكن";
+        } else {
+            document.body.classList.add('light-mode');
+            settings.theme = 'light';
+            themeBtn.innerText = "الوضع الفاتح";
+        }
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+        window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.SETTINGS, newValue: JSON.stringify(settings) }));
+    }
 
-function loadSettings() {
-    const defaultSettings = { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar', primaryColor: '#6D001A', accentColor: '#fec400' };
-    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || defaultSettings;
-    const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
-    
-    document.getElementById('storeNameSetting').value = settings.storeName;
-    document.getElementById('storeCurrencySetting').value = settings.currency;
-    document.getElementById('panelLogo').innerText = settings.storeName;
-    
-    // وضع قيم الألوان الحالية داخل الحقول لتظهر للمستخدم
-    document.getElementById('primaryColorSetting').value = settings.primaryColor || '#6D001A';
-    document.getElementById('accentColorSetting').value = settings.accentColor || '#fec400';
-    
-    currentCurrency = settings.currency;
-    currentLang = settings.lang;
+    function toggleLanguage() {
+        const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS));
+        const langBtn = document.getElementById('langToggle');
+        if (currentLang === 'ar') {
+            currentLang = 'en';
+            langBtn.innerText = "English";
+            document.body.classList.add('ltr-mode');
+        } else {
+            currentLang = 'ar';
+            langBtn.innerText = "العربية";
+            document.body.classList.remove('ltr-mode');
+        }
+        settings.lang = currentLang;
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+        updateDashboard();
+        window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.SETTINGS, newValue: JSON.stringify(settings) }));
+    }
 
-    // تطبيق الألوان المسترجعة برمجياً
-    applyCustomColors(settings.primaryColor, settings.accentColor);
-
-    if(security) {
-        document.getElementById('adminUserSetting').value = security.user;
-        document.getElementById('adminPassSetting').value = security.pass;
+    function toggleSecuritySystem() {
+        const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
+        security.enabled = !security.enabled;
+        localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify(security));
         updateSecurityToggleButton(security.enabled);
     }
 
-    const themeBtn = document.getElementById('themeToggle');
-    if (settings.theme === 'light') {
-        document.body.classList.add('light-mode');
-        themeBtn.innerHTML = `<i class="bi bi-sun-fill"></i> <span>${LANGUAGES[currentLang].themeLight}</span>`;
-    } else {
-        document.body.classList.remove('light-mode');
-        themeBtn.innerHTML = `<i class="bi bi-moon-fill"></i> <span>${LANGUAGES[currentLang].themeDark}</span>`;
+    function updateSecurityToggleButton(enabled) {
+        const btn = document.getElementById('securityToggle');
+        btn.innerHTML = enabled ? 'مفعلة' : 'معطلة';
+        btn.style.background = enabled ? 'var(--primary-color)' : '#333';
     }
 
-    const langBtn = document.getElementById('langToggle');
-    langBtn.innerHTML = `<i class="bi bi-translate"></i> <span>${currentLang === 'en' ? 'English' : 'العربية'}</span>`;
-
-    applyTranslations();
-}
-
-function toggleTheme() {
-    const themeBtn = document.getElementById('themeToggle');
-    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar', primaryColor: '#6D001A', accentColor: '#fec400' };
-    
-    if (document.body.classList.contains('light-mode')) {
-        document.body.classList.remove('light-mode');
-        themeBtn.innerHTML = `<i class="bi bi-moon-fill"></i> <span>${LANGUAGES[currentLang].themeDark}</span>`;
-        settings.theme = 'dark';
-    } else {
-        document.body.classList.add('light-mode');
-        themeBtn.innerHTML = `<i class="bi bi-sun-fill"></i> <span>${LANGUAGES[currentLang].themeLight}</span>`;
-        settings.theme = 'light';
-    }
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-}
-
-function toggleLanguage() {
-    const langBtn = document.getElementById('langToggle');
-    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar', primaryColor: '#6D001A', accentColor: '#fec400' };
-    
-    if (currentLang === 'ar') {
-        currentLang = 'en';
-        langBtn.innerHTML = `<i class="bi bi-translate"></i> <span>English</span>`;
-    } else {
-        currentLang = 'ar';
-        langBtn.innerHTML = `<i class="bi bi-translate"></i> <span>العربية</span>`;
-    }
-    
-    settings.lang = currentLang;
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-    
-    const themeBtn = document.getElementById('themeToggle');
-    if (document.body.classList.contains('light-mode')) {
-        themeBtn.innerHTML = `<i class="bi bi-sun-fill"></i> <span>${LANGUAGES[currentLang].themeLight}</span>`;
-    } else {
-        themeBtn.innerHTML = `<i class="bi bi-moon-fill"></i> <span>${LANGUAGES[currentLang].themeDark}</span>`;
-    }
-
-    const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
-    if(security) updateSecurityToggleButton(security.enabled);
-
-    applyTranslations();
-    updateDashboard();
-}
-
-function toggleSecuritySystem() {
-    const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
-    security.enabled = !security.enabled;
-    localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify(security));
-    updateSecurityToggleButton(security.enabled);
-}
-
-function updateSecurityToggleButton(isEnabled) {
-    const btn = document.getElementById('securityToggle');
-    const t = LANGUAGES[currentLang];
-    if(isEnabled) {
-        btn.innerHTML = `<i class="bi bi-shield-fill-check"></i> <span>${t.securityEnabled}</span>`;
-        btn.style.background = "var(--primary-color)";
-        btn.style.borderColor = "var(--primary-color)";
-    } else {
-        btn.innerHTML = `<i class="bi bi-shield-fill-x"></i> <span>${t.securityDisabled}</span>`;
-        btn.style.background = "#333";
-        btn.style.borderColor = "#444";
-    }
-}
-
-function saveSettings() {
-    const storeName = document.getElementById('storeNameSetting').value;
-    const currency = document.getElementById('storeCurrencySetting').value;
-    const primaryColor = document.getElementById('primaryColorSetting').value;
-    const accentColor = document.getElementById('accentColorSetting').value;
-    const isLight = document.body.classList.contains('light-mode');
-
-    const settings = {
-        storeName: storeName,
-        currency: currency,
-        theme: isLight ? 'light' : 'dark',
-        lang: currentLang,
-        primaryColor: primaryColor,
-        accentColor: accentColor
-    };
-    
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-    document.getElementById('panelLogo').innerText = storeName;
-    currentCurrency = currency;
-    
-    // تطبيق الألوان فوراً عند الحفظ دون الحاجة لتحديث الصفحة
-    applyCustomColors(primaryColor, accentColor);
-    
-    const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
-    security.user = document.getElementById('adminUserSetting').value;
-    security.pass = document.getElementById('adminPassSetting').value;
-    localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify(security));
-
-    updateDashboard();
-    alert(LANGUAGES[currentLang].msgSettingsSaved);
-}
-
-function updateDashboard() {
-    const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-    const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
-    const t = LANGUAGES[currentLang];
-
-    const revenue = orders.filter(o => o.status === 'completed').reduce((sum, order) => sum + (order.total || 0), 0);
-
-    document.getElementById('totalOrders').innerText = orders.length;
-    document.getElementById('totalRevenue').innerText = `${revenue.toLocaleString()} ${currentCurrency}`;
-    document.getElementById('totalProducts').innerText = products.length;
-
-    const recentOrdersBody = document.getElementById('recentOrdersBody');
-    const latestOrders = orders.slice().reverse().slice(0, 5);
-    
-    recentOrdersBody.innerHTML = latestOrders.map(order => `
-        <tr>
-            <td>#${order.id}</td>
-            <td>${order.customerName || (currentLang === 'en' ? 'Unknown Customer' : 'عميل مجهول')}</td>
-            <td>${order.total.toLocaleString()} ${currentCurrency}</td>
-            <td><span style="color: ${order.status === 'completed' ? '#4CAF50' : '#FF9800'}">
-                ${order.status === 'completed' ? t.statusCompleted : t.statusPending}
-            </span></td>
-        </tr>
-    `).join('');
-
-    renderProductsList();
-    renderOrdersList();
-    renderStatistics(orders);
-    renderCustomersList(orders);
-}
-
-function handleProductSubmit(e) {
-    e.preventDefault();
-    const id = document.getElementById('pId').value;
-    const name = document.getElementById('pName').value;
-    const price = parseFloat(document.getElementById('pPrice').value);
-    const category = document.getElementById('pCategory').value;
-    const t = LANGUAGES[currentLang];
-
-    let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
-
-    if (id) {
-        products = products.map(p => p.id == id ? { id: Number(id), name, price, category } : p);
-        alert(t.msgProductUpdated);
-    } else {
-        const newProduct = { id: Date.now(), name, price, category };
-        products.push(newProduct);
-        alert(t.msgProductAdded);
-    }
-
-    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    
-    document.getElementById('productForm').reset();
-    document.getElementById('pId').value = '';
-    document.getElementById('formSubmitBtn').innerHTML = `<i class="bi bi-plus-circle"></i> <span>${t.btnSaveProduct}</span>`;
-
-    updateDashboard();
-}
-
-function renderProductsList() {
-    const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
-    const container = document.getElementById('adminProductList');
-    const t = LANGUAGES[currentLang];
-    
-    if(products.length === 0) {
-        container.innerHTML = `<p style="color: #666; text-align: center;">${t.txtNoProducts}</p>`;
-        return;
-    }
-
-    container.innerHTML = products.map(product => `
-        <div class="product-item">
-            <div>
-                <strong>${product.name}</strong> - <span style="color: var(--accent-color)">${product.price.toLocaleString()} ${currentCurrency}</span> 
-                <br><small style="color: #888">${t.txtCategory}${product.category}</small>
-            </div>
-            <div class="product-actions">
-                <button class="btn-edit" onclick="editProduct(${product.id})"><i class="bi bi-pencil-square"></i> ${t.btnEdit}</button>
-                <button class="btn-delete" onclick="deleteProduct(${product.id})"><i class="bi bi-trash"></i> ${t.btnDelete}</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function editProduct(id) {
-    const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
-    const product = products.find(p => p.id === id);
-    const t = LANGUAGES[currentLang];
-    if(product) {
-        document.getElementById('pId').value = product.id;
-        document.getElementById('pName').value = product.name;
-        document.getElementById('pPrice').value = product.price;
-        document.getElementById('pCategory').value = product.category;
+    function saveSettings() {
+        const settings = {
+            storeName: document.getElementById('storeNameSetting').value,
+            currency: document.getElementById('storeCurrencySetting').value,
+            theme: document.body.classList.contains('light-mode') ? 'light' : 'dark',
+            lang: currentLang,
+            primaryColor: document.getElementById('primaryColorSetting').value,
+            accentColor: document.getElementById('accentColorSetting').value
+        };
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
         
-        document.getElementById('formSubmitBtn').innerHTML = `<i class="bi bi-check-all"></i> <span>${t.btnUpdateProduct}</span>`;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-}
-
-function deleteProduct(id) {
-    const t = LANGUAGES[currentLang];
-    if(confirm(t.msgConfirmDeleteProduct)) {
-        let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
-        products = products.filter(p => p.id !== id);
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+        const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
+        security.user = document.getElementById('adminUserSetting').value;
+        security.pass = document.getElementById('adminPassSetting').value;
+        localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify(security));
         
-        if(document.getElementById('pId').value == id) {
-            document.getElementById('productForm').reset();
-            document.getElementById('pId').value = '';
-            document.getElementById('formSubmitBtn').innerHTML = `<i class="bi bi-plus-circle"></i> <span>${t.btnSaveProduct}</span>`;
-        }
+        applyCustomColors(settings.primaryColor, settings.accentColor);
+        currentCurrency = settings.currency;
+        document.getElementById('panelLogo').innerText = settings.storeName;
+        
         updateDashboard();
-    }
-}
-
-function renderOrdersList() {
-    const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-    const container = document.getElementById('adminOrdersContainer');
-    const t = LANGUAGES[currentLang];
-
-    if(orders.length === 0) {
-        container.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#666;">${t.txtNoOrders}</td></tr>`;
-        return;
+        alert("تم حفظ الإعدادات بنجاح ومزامنتها!");
+        window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.SETTINGS, newValue: JSON.stringify(settings) }));
     }
 
-    container.innerHTML = orders.map(order => `
-        <tr>
-            <td>#${order.id}</td>
-            <td>${order.customerName}</td>
-            <td>${order.phone || (currentLang === 'en' ? 'Unregistered' : 'غير مسجل')}</td>
-            <td>${order.total.toLocaleString()} ${currentCurrency}</td>
-            <td>
-                <span style="padding: 4px 8px; border-radius: 5px; background: ${order.status === 'completed' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 152, 0, 0.2)'}; color: ${order.status === 'completed' ? '#4CAF50' : '#FF9800'}">
-                    ${order.status === 'completed' ? t.statusCompleted : t.statusPending}
-                </span>
-            </td>
-            <td>
-                ${order.status === 'pending' ? `<button class="btn-status" onclick="toggleOrderStatus(${order.id})">${t.btnMarkComplete}</button>` : `<span style="color: #4CAF50; font-size:12px;"><i class="bi bi-check2-all"></i> ${t.statusDelivered}</span>`}
-            </td>
-        </tr>
-    `).join('');
-}
+    function updateDashboard() {
+        const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+        const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+        const completedTotal = orders.filter(o => o.status === 'completed').reduce((s,o) => s + o.total, 0);
+        
+        document.getElementById('totalOrders').innerText = orders.length;
+        document.getElementById('totalRevenue').innerText = `${completedTotal.toLocaleString()} ${currentCurrency}`;
+        document.getElementById('totalProducts').innerText = products.length;
 
-function toggleOrderStatus(id) {
-    let orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-    orders = orders.map(order => {
-        if(order.id === id) order.status = 'completed';
-        return order;
-    });
-    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
-    updateDashboard();
-}
-
-function renderStatistics(orders) {
-    const completedOrders = orders.filter(o => o.status === 'completed');
-    const pendingOrders = orders.filter(o => o.status === 'pending');
-    const avgExpense = orders.length ? Math.round(orders.reduce((s, o) => s + o.total, 0) / orders.length) : 0;
-    const t = LANGUAGES[currentLang];
-    
-    const container = document.getElementById('adminStatsContainer');
-    container.innerHTML = `
-        <div class="stat-card" style="border-color: #4CAF50;">
-            <i class="bi bi-check-circle" style="color: #4CAF50;"></i>
-            <h3>${t.statCardCompleted}</h3>
-            <p>${completedOrders.length}</p>
-        </div>
-        <div class="stat-card" style="border-color: #FF9800;">
-            <i class="bi bi-hourglass-split" style="color: #FF9800;"></i>
-            <h3>${t.statCardPending}</h3>
-            <p>${pendingOrders.length}</p>
-        </div>
-        <div class="stat-card">
-            <i class="bi bi-graph-up-arrow"></i>
-            <h3>${t.statCardAvg}</h3>
-            <p>${avgExpense.toLocaleString()} ${currentCurrency}</p>
-        </div>
-    `;
-}
-
-function renderCustomersList(orders) {
-    const container = document.getElementById('adminCustomersList');
-    const t = LANGUAGES[currentLang];
-    if(orders.length === 0) {
-        container.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#666;">${t.txtNoCustomers}</td></tr>`;
-        return;
+        const recent = orders.slice().reverse().slice(0,5);
+        document.getElementById('recentOrdersBody').innerHTML = recent.map(o => `<tr><td>#${o.id}</td><td>${o.customerName}</td><td>${o.total.toLocaleString()} ${currentCurrency}</td><td><span style="color:${o.status === 'completed' ? '#4CAF50':'#FF9800'}">${o.status === 'completed' ? 'مكتمل' : 'قيد الانتظار'}</span></td></tr>`).join('');
+        
+        renderProductsList();
+        renderOrdersList();
+        renderStatistics(orders);
+        renderCustomersList(orders);
     }
 
-    const customersMap = {};
-    orders.forEach(order => {
-        const cName = order.customerName || (currentLang === 'en' ? 'Unknown Customer' : 'عميل مجهول');
-        const contact = order.phone || (currentLang === 'en' ? 'No Phone' : 'لا يوجد هاتف');
-        if (!customersMap[cName]) {
-            customersMap[cName] = { contact: contact, count: 0 };
+    function renderProductsList() {
+        const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+        const container = document.getElementById('adminProductList');
+        if (!products.length) { container.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-muted);">لا توجد منتجات حالياً.</p>'; return; }
+        container.innerHTML = products.map(p => `
+            <div class="product-item">
+                <div><strong>${p.name}</strong> - <span style="color:var(--accent-color)">${p.price.toLocaleString()} ${currentCurrency}</span><br><small style="color:var(--text-muted);">${p.category}</small></div>
+                <div><button class="btn-edit" onclick="editProduct(${p.id})">تعديل</button><button class="btn-delete" onclick="deleteProduct(${p.id})">حذف</button></div>
+            </div>
+        `).join('');
+    }
+
+    function handleProductSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('pId').value;
+        const name = document.getElementById('pName').value;
+        const price = parseFloat(document.getElementById('pPrice').value);
+        const category = document.getElementById('pCategory').value;
+        let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+        
+        if (id) {
+            products = products.map(p => p.id == id ? { id: Number(id), name, price, category } : p);
+            alert("تم تحديث المنتج بنجاح!");
+        } else {
+            products.push({ id: Date.now(), name, price, category });
+            alert("تم إضافة المنتج بنجاح!");
         }
-        customersMap[cName].count += 1;
-    });
-
-    container.innerHTML = Object.keys(customersMap).map(name => `
-        <tr>
-            <td><strong>${name}</strong></td>
-            <td>${customersMap[name].contact}</td>
-            <td>${customersMap[name].count} ${t.txtOrderCountText}</td>
-        </tr>
-    `).join('');
-}
-
-function exportTableToExcel(tableID, filename = '') {
-    const tableSelect = document.getElementById(tableID);
-    const tableHTML = tableSelect.outerHTML;
-    const mimeType = 'application/vnd.ms-excel';
-    
-    filename = filename ? filename + '.xls' : 'excel_data.xls';
-    const blob = new Blob(['\ufeff' + tableHTML], { type: mimeType });
-    const downloadLink = document.createElement("a");
-    document.body.appendChild(downloadLink);
-    
-    if (navigator.msSaveOrOpenBlob) {
-        navigator.msSaveOrOpenBlob(blob, filename);
-    } else {
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = filename;
-        downloadLink.click();
+        
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+        document.getElementById('productForm').reset();
+        document.getElementById('pId').value = '';
+        document.getElementById('formSubmitBtn').innerHTML = 'حفظ المنتج';
+        
+        updateDashboard();
+        window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.PRODUCTS, newValue: JSON.stringify(products) }));
     }
-    document.body.removeChild(downloadLink);
-}
 
-function exportStoreJSON() {
-    const fullData = {
-        products: JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]'),
-        orders: JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]'),
-        settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || '{}'),
-        security: JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY) || '{}')
-    };
-
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullData, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `store_backup_${Date.now()}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-}
-
-function importStoreJSON(event) {
-    const file = event.target.files[0];
-    const t = LANGUAGES[currentLang];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const importedData = JSON.parse(e.target.result);
-            
-            if (importedData.products || importedData.orders || importedData.settings) {
-                if(confirm(t.msgConfirmImport)) {
-                    if (importedData.products) localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(importedData.products));
-                    if (importedData.orders) localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(importedData.orders));
-                    if (importedData.settings) localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(importedData.settings));
-                    if (importedData.security) localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify(importedData.security));
-                    
-                    loadSettings();
-                    checkSecurityAccess();
-                    updateDashboard();
-                    alert(t.msgImportSuccess);
-                }
-            } else {
-                alert(t.msgImportError);
-            }
-        } catch (err) {
-            alert(t.msgJsonReadError);
+    window.editProduct = function(id) {
+        const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS));
+        const p = products.find(p => p.id === id);
+        if (p) {
+            document.getElementById('pId').value = p.id;
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pCategory').value = p.category;
+            document.getElementById('formSubmitBtn').innerHTML = 'تحديث المنتج الحالي';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
-    reader.readAsText(file);
-}
 
-window.addEventListener('load', () => {
-    initializeDemoData();
+    window.deleteProduct = function(id) {
+        if (confirm("هل أنت متأكد من حذف هذا المنتج نهائياً؟")) {
+            let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS));
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+            updateDashboard();
+            window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.PRODUCTS, newValue: JSON.stringify(products) }));
+        }
+    };
+
+    function renderOrdersList() {
+        const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+        const tbody = document.getElementById('adminOrdersContainer');
+        if (!orders.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">لا توجد طلبات مسجلة.</td></tr>'; return; }
+        tbody.innerHTML = orders.map(o => `
+            <tr>
+                <td>#${o.id}</td>
+                <td><strong>${o.customerName}</strong></td>
+                <td>${o.phone || 'غير مسجل'}</td>
+                <td>${o.total.toLocaleString()} ${currentCurrency}</td>
+                <td><span style="color:${o.status === 'completed' ? '#4CAF50':'#FF9800'}">${o.status === 'completed' ? 'مكتمل' : 'قيد الانتظار'}</span></td>
+                <td>${o.status === 'pending' ? `<button class="btn-status" onclick="toggleOrderStatus(${o.id})">تحديد كمكتمل</button>` : '<span style="color:#4CAF50;"><i class="bi bi-check2-all"></i> تم التسليم</span>'}</td>
+            </tr>
+        `).join('');
+    }
+
+    window.toggleOrderStatus = function(id) {
+        let orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS));
+        orders = orders.map(o => o.id === id ? { ...o, status: 'completed' } : o);
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+        updateDashboard();
+        window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.ORDERS, newValue: JSON.stringify(orders) }));
+    };
+
+    function renderStatistics(orders) {
+        const completed = orders.filter(o => o.status === 'completed').length;
+        const pending = orders.filter(o => o.status === 'pending').length;
+        const avg = orders.length ? Math.round(orders.reduce((s,o) => s+o.total,0)/orders.length) : 0;
+        document.getElementById('adminStatsContainer').innerHTML = `
+            <div class="stat-card" style="border-color:#4CAF50;"><i class="bi bi-check-circle" style="color:#4CAF50;"></i><h3>الطلبات المكتملة</h3><p>${completed}</p></div>
+            <div class="stat-card" style="border-color:#FF9800;"><i class="bi bi-hourglass-split" style="color:#FF9800;"></i><h3>الطلبات قيد الانتظار</h3><p>${pending}</p></div>
+            <div class="stat-card"><i class="bi bi-graph-up-arrow"></i><h3>متوسط قيمة الطلب</h3><p>${avg.toLocaleString()} ${currentCurrency}</p></div>
+        `;
+    }
+
+    function renderCustomersList(orders) {
+        const map = new Map();
+        orders.forEach(o => {
+            const name = o.customerName;
+            if (!map.has(name)) map.set(name, { phone: o.phone || 'لا يوجد هاتف', count: 0 });
+            map.get(name).count++;
+        });
+        const tbody = document.getElementById('adminCustomersList');
+        if (!map.size) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">لا يوجد عملاء مسجلين.</td></tr>'; return; }
+        tbody.innerHTML = Array.from(map.entries()).map(([name, data]) => `<tr><td><strong>${name}</strong></td><td>${data.phone}</td><td>${data.count} طلب(ات)</td></tr>`).join('');
+    }
+
+    function exportTableToExcel(tableId, filename) {
+        const table = document.getElementById(tableId);
+        const html = table.outerHTML;
+        const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${filename}_export_${Date.now()}.xls`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    function exportStoreJSON() {
+        const data = {
+            products: JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)),
+            orders: JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)),
+            settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)),
+            security: JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY))
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `store_backup_${Date.now()}.json`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    function importStoreJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (!confirm("تحذير: الاستيراد سيقوم باستبدال كافة البيانات الحالية ببيانات الملف المرفوع، هل تود الاستمرار؟")) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.products) localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(data.products));
+                if (data.orders) localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(data.orders));
+                if (data.settings) localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(data.settings));
+                if (data.security) localStorage.setItem(STORAGE_KEYS.SECURITY, JSON.stringify(data.security));
+                loadSettings();
+                checkSecurityAccess();
+                updateDashboard();
+                alert("تم استيراد كافة البيانات بنجاح والمزامنة فوراً!");
+                // بث التحديث للمتجر الرئيسي
+                window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.PRODUCTS, newValue: JSON.stringify(data.products || []) }));
+            } catch(err) { alert("صيغة الملف غير مدعومة أو تالفة."); }
+        };
+        reader.readAsText(file);
+    }
+
+    // المزامنة الفورية عند حدوث أي تعديل خارجي من صفحة المتجر
+    window.addEventListener('storage', (e) => {
+        if (Object.values(STORAGE_KEYS).includes(e.key)) {
+            console.log(`تزامن مباشر: تحديث في المتجر على ${e.key}`);
+            loadSettings();
+            updateDashboard();
+        }
+    });
+
+    // التنفيذ الأولي عند الإقلاع
+    initData();
     loadSettings();
     checkSecurityAccess();
     updateDashboard();
-});
 </script>
 </body>
 </html>
