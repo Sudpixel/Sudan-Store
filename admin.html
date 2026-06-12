@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #6D001A;
+            --accent-color: #fec400;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -53,7 +58,7 @@
         }
         body.ltr-mode h2 {
             border-right: none;
-            border-left: 4px solid #6D001A;
+            border-left: 4px solid var(--primary-color);
             padding-right: 0;
             padding-left: 10px;
         }
@@ -88,7 +93,7 @@
         }
         .login-box i.lock-icon {
             font-size: 50px;
-            color: #6D001A;
+            color: var(--primary-color);
             margin-bottom: 15px;
             display: inline-block;
         }
@@ -105,7 +110,7 @@
             margin-bottom: 15px;
             font-family: 'Cairo', sans-serif;
         }
-        .login-box input:focus { border-color: #6D001A; }
+        .login-box input:focus { border-color: var(--primary-color); }
         .login-box button {
             width: 100%;
             justify-content: center;
@@ -161,7 +166,7 @@
             right: 0;
             width: 0;
             height: 2px;
-            background: #6D001A;
+            background: var(--primary-color);
             transition: width 0.25s ease;
         }
 
@@ -183,7 +188,7 @@
         h2 {
             margin-bottom: 20px;
             font-weight: 700;
-            border-right: 4px solid #6D001A;
+            border-right: 4px solid var(--primary-color);
             padding-right: 10px;
         }
 
@@ -219,12 +224,13 @@
         }
 
         #productForm input:focus {
-            border-color: #6D001A;
+            border-color: var(--primary-color);
         }
         
         #productForm button, .btn-main {
-            background: rgba(109, 0, 26, 0.8);
-            border: 1px solid #6D001A;
+            background: var(--primary-color);
+            opacity: 0.9;
+            border: 1px solid var(--primary-color);
             color: #fff;
             font-size: 14px;
             font-weight: 600;
@@ -239,8 +245,8 @@
         }
 
         #productForm button:hover, .btn-main:hover {
-            background: #6D001A;
-            box-shadow: 0 0 10px rgba(109,0,26,0.5);
+            opacity: 1;
+            box-shadow: 0 0 10px var(--primary-color);
         }
 
         .btn-excel {
@@ -285,8 +291,8 @@
         }
 
         .btn-edit {
-            color: #fec400;
-            border: 1px solid #fec400;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
             padding: 6px 12px;
             border-radius: 8px;
             cursor: pointer;
@@ -296,7 +302,7 @@
         }
 
         .btn-edit:hover {
-            background: #fec400;
+            background: var(--accent-color);
             color: black;
         }
 
@@ -329,7 +335,7 @@
 
         .stat-card i {
             font-size: 30px;
-            color: #6D001A;
+            color: var(--primary-color);
             margin-bottom: 10px;
         }
 
@@ -354,7 +360,7 @@
         }
 
         .recent-orders-table th, .admin-table th {
-            color: #6D001A;
+            color: var(--primary-color);
             font-weight: 800;
             background: #0a0a0a;
         }
@@ -384,6 +390,14 @@
             outline: none;
         }
         
+        .settings-group input[type="color"] {
+            width: 60px;
+            height: 40px;
+            padding: 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
         .file-upload-wrapper {
             position: relative;
             display: inline-block;
@@ -398,7 +412,6 @@
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول للحماية -->
 <div class="login-overlay" id="loginOverlay" style="display: none;">
     <div class="login-box">
         <i class="bi bi-shield-lock-fill lock-icon"></i>
@@ -524,6 +537,17 @@
                     <label data-i18n="lblCurrency">العملة الافتراضية</label>
                     <input type="text" id="storeCurrencySetting" value="SDG">
                 </div>
+                
+                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid var(--accent-color); padding-right: 10px;" data-i18n="themeCustomizerTitle">تخصيص ألوان الهوية والواجهة</h3>
+                <div class="settings-group">
+                    <label data-i18n="lblPrimaryColor">اللون الرئيسي للمتجر (أزرار وحدود)</label>
+                    <input type="color" id="primaryColorSetting" value="#6D001A">
+                </div>
+                <div class="settings-group">
+                    <label data-i18n="lblAccentColor">اللون الثانوي التفاعلي (الأسعار والتعديل)</label>
+                    <input type="color" id="accentColorSetting" value="#fec400">
+                </div>
+
                 <div class="settings-situation">
                     <label data-i18n="lblTheme">المظهر المفضل</label>
                     <button id="themeToggle" class="btn-main" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i> <span>الوضع الداكن</span></button>
@@ -533,8 +557,7 @@
                     <button id="langToggle" class="btn-main" onclick="toggleLanguage()"><i class="bi bi-translate"></i> <span>العربية</span></button>
                 </div>
                 
-                <!-- قسم إدارة الأمان والوصول الجديد -->
-                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid #6D001A; padding-right: 10px;" data-i18n="securityTitle">إدارة الأمان والوصول للوحة</h3>
+                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid var(--primary-color); padding-right: 10px;" data-i18n="securityTitle">إدارة الأمان والوصول للوحة</h3>
                 <div class="settings-situation" style="margin-bottom: 15px;">
                     <label data-i18n="lblSecurityStatus">حالة الحماية البرمجية</label>
                     <button id="securityToggle" class="btn-main" onclick="toggleSecuritySystem()"><i class="bi bi-shield-fill-check"></i> <span>مفعلة</span></button>
@@ -548,11 +571,11 @@
                     <input type="password" id="adminPassSetting" value="1234">
                 </div>
 
-                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid #fec400; padding-right: 10px;" data-i18n="backupTitle">النسخ الاحتياطي والبيانات (JSON)</h3>
+                <h3 style="margin: 25px 0 15px 0; border-right: 4px solid var(--accent-color); padding-right: 10px;" data-i18n="backupTitle">النسخ الاحتياطي والبيانات (JSON)</h3>
                 <div class="settings-group" style="display: flex; gap: 15px; justify-content: flex-start; flex-wrap: wrap;">
                     <button class="btn-main" style="background:#333; border-color:#444;" onclick="exportStoreJSON()"><i class="bi bi-download"></i> <span data-i18n="btnExportJson">تصدير كافة البيانات (JSON)</span></button>
                     <div class="file-upload-wrapper">
-                        <button class="btn-main" style="background:#6D001A; border-color:#6D001A;"><i class="bi bi-upload"></i> <span data-i18n="btnImportJson">استيراد بيانات المتجر (JSON)</span></button>
+                        <button class="btn-main" style="background:var(--primary-color); border-color:var(--primary-color);"><i class="bi bi-upload"></i> <span data-i18n="btnImportJson">استيراد بيانات المتجر (JSON)</span></button>
                         <input type="file" id="importJsonInput" accept=".json" onchange="importStoreJSON(event)">
                     </div>
                 </div>
@@ -580,6 +603,7 @@ const LANGUAGES = {
         ordersTitle: "إدارة الطلبات الجديدة والمستلمة", btnExportExcel: "تصدير Excel", thPhone: "الهاتف", thActions: "إجراءات",
         statsTitle: "الإحصائيات والتقارير العامة", customersTitle: "قائمة العملاء المسجلين", thContact: "البريد الإلكتروني / الهاتف", thOrdersCount: "عدد الطلبات",
         settingsTitle: "إعدادات المتجر العامة", lblStoreName: "اسم المتجر", lblCurrency: "العملة الافتراضية", lblTheme: "المظهر المفضل", lblLang: "اللغة المفضلة",
+        themeCustomizerTitle: "تخصيص ألوان الهوية والواجهة", lblPrimaryColor: "اللون الرئيسي للمتجر (أزرار وحدود)", lblAccentColor: "اللون الثانوي التفاعلي (الأسعار والتعديل)",
         securityTitle: "إدارة الأمان والوصول للوحة", lblSecurityStatus: "حالة الحماية البرمجية", lblAdminUser: "اسم مستخدم المسؤول", lblAdminPass: "كلمة مرور المسؤول",
         backupTitle: "النسخ الاحتياطي والبيانات (JSON)", btnExportJson: "تصدير كافة البيانات (JSON)", btnImportJson: "استيراد بيانات المتجر (JSON)",
         btnSaveGeneralSettings: "حفظ التعديلات العامة", statusCompleted: "مكتمل", statusPending: "قيد الانتظار", statusDelivered: "تم تسليمه",
@@ -601,6 +625,7 @@ const LANGUAGES = {
         ordersTitle: "Manage New & Received Orders", btnExportExcel: "Export Excel", thPhone: "Phone", thActions: "Actions",
         statsTitle: "General Statistics & Reports", customersTitle: "Registered Customers List", thContact: "Email / Phone", thOrdersCount: "Orders Count",
         settingsTitle: "General Store Settings", lblStoreName: "Store Name", lblCurrency: "Default Currency", lblTheme: "Preferred Theme", lblLang: "Preferred Language",
+        themeCustomizerTitle: "Identity & Interface Colors", lblPrimaryColor: "Primary Store Color (Buttons & Borders)", lblAccentColor: "Secondary Active Color (Prices & Edit)",
         securityTitle: "Security & Access Control", lblSecurityStatus: "Security System Status", lblAdminUser: "Admin Username", lblAdminPass: "Admin Password",
         backupTitle: "Backup & Data (JSON)", btnExportJson: "Export All Data (JSON)", btnImportJson: "Import Store Data (JSON)",
         btnSaveGeneralSettings: "Save General Settings", statusCompleted: "Completed", statusPending: "Pending", statusDelivered: "Delivered",
@@ -650,11 +675,11 @@ function checkSecurityAccess() {
     
     if (security && security.enabled) {
         overlay.style.display = 'flex';
-        panel.style.styleOpacity = '0'; 
+        panel.style.opacity = '0'; 
         panel.style.pointerEvents = 'none';
     } else {
         overlay.style.display = 'none';
-        panel.style.styleOpacity = '1';
+        panel.style.opacity = '1';
         panel.style.pointerEvents = 'auto';
     }
 }
@@ -668,9 +693,8 @@ function handleLogin() {
     if (userInp === security.user && passInp === security.pass) {
         document.getElementById('loginOverlay').style.display = 'none';
         const panel = document.getElementById('mainAdminPanel');
-        panel.style.styleOpacity = '1';
+        panel.style.opacity = '1';
         panel.style.pointerEvents = 'auto';
-        // مسح الحقول لأمان إضافي
         document.getElementById('loginUser').value = '';
         document.getElementById('loginPass').value = '';
     } else {
@@ -729,18 +753,30 @@ function applyTranslations() {
     }
 }
 
+function applyCustomColors(primary, accent) {
+    document.documentElement.style.setProperty('--primary-color', primary || '#6D001A');
+    document.documentElement.style.setProperty('--accent-color', accent || '#fec400');
+}
+
 function loadSettings() {
-    const defaultSettings = { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar' };
+    const defaultSettings = { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar', primaryColor: '#6D001A', accentColor: '#fec400' };
     const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || defaultSettings;
     const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
     
     document.getElementById('storeNameSetting').value = settings.storeName;
     document.getElementById('storeCurrencySetting').value = settings.currency;
     document.getElementById('panelLogo').innerText = settings.storeName;
+    
+    // وضع قيم الألوان الحالية داخل الحقول لتظهر للمستخدم
+    document.getElementById('primaryColorSetting').value = settings.primaryColor || '#6D001A';
+    document.getElementById('accentColorSetting').value = settings.accentColor || '#fec400';
+    
     currentCurrency = settings.currency;
     currentLang = settings.lang;
 
-    // تعبئة حقول الحماية في الإعدادات
+    // تطبيق الألوان المسترجعة برمجياً
+    applyCustomColors(settings.primaryColor, settings.accentColor);
+
     if(security) {
         document.getElementById('adminUserSetting').value = security.user;
         document.getElementById('adminPassSetting').value = security.pass;
@@ -764,7 +800,7 @@ function loadSettings() {
 
 function toggleTheme() {
     const themeBtn = document.getElementById('themeToggle');
-    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar' };
+    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar', primaryColor: '#6D001A', accentColor: '#fec400' };
     
     if (document.body.classList.contains('light-mode')) {
         document.body.classList.remove('light-mode');
@@ -780,7 +816,7 @@ function toggleTheme() {
 
 function toggleLanguage() {
     const langBtn = document.getElementById('langToggle');
-    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar' };
+    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || { storeName: 'Black Store', currency: 'SDG', theme: 'dark', lang: 'ar', primaryColor: '#6D001A', accentColor: '#fec400' };
     
     if (currentLang === 'ar') {
         currentLang = 'en';
@@ -819,8 +855,8 @@ function updateSecurityToggleButton(isEnabled) {
     const t = LANGUAGES[currentLang];
     if(isEnabled) {
         btn.innerHTML = `<i class="bi bi-shield-fill-check"></i> <span>${t.securityEnabled}</span>`;
-        btn.style.background = "rgba(109, 0, 26, 0.8)";
-        btn.style.borderColor = "#6D001A";
+        btn.style.background = "var(--primary-color)";
+        btn.style.borderColor = "var(--primary-color)";
     } else {
         btn.innerHTML = `<i class="bi bi-shield-fill-x"></i> <span>${t.securityDisabled}</span>`;
         btn.style.background = "#333";
@@ -831,19 +867,26 @@ function updateSecurityToggleButton(isEnabled) {
 function saveSettings() {
     const storeName = document.getElementById('storeNameSetting').value;
     const currency = document.getElementById('storeCurrencySetting').value;
+    const primaryColor = document.getElementById('primaryColorSetting').value;
+    const accentColor = document.getElementById('accentColorSetting').value;
     const isLight = document.body.classList.contains('light-mode');
 
     const settings = {
         storeName: storeName,
         currency: currency,
         theme: isLight ? 'light' : 'dark',
-        lang: currentLang
+        lang: currentLang,
+        primaryColor: primaryColor,
+        accentColor: accentColor
     };
+    
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
     document.getElementById('panelLogo').innerText = storeName;
     currentCurrency = currency;
     
-    // حفظ إعدادات الحماية المحدثة
+    // تطبيق الألوان فوراً عند الحفظ دون الحاجة لتحديث الصفحة
+    applyCustomColors(primaryColor, accentColor);
+    
     const security = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECURITY));
     security.user = document.getElementById('adminUserSetting').value;
     security.pass = document.getElementById('adminPassSetting').value;
@@ -925,7 +968,7 @@ function renderProductsList() {
     container.innerHTML = products.map(product => `
         <div class="product-item">
             <div>
-                <strong>${product.name}</strong> - <span style="color: #fec400">${product.price.toLocaleString()} ${currentCurrency}</span> 
+                <strong>${product.name}</strong> - <span style="color: var(--accent-color)">${product.price.toLocaleString()} ${currentCurrency}</span> 
                 <br><small style="color: #888">${t.txtCategory}${product.category}</small>
             </div>
             <div class="product-actions">
