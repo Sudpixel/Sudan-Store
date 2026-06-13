@@ -224,9 +224,9 @@
     function initData() {
         if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
             localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify([
-                { id: 101, name: "PlayStation 5 Pro", price: 650000, category: "أجهزة" },
-                { id: 102, name: "GTA VI", price: 60000, category: "ألعاب" },
-                { id: 103, name: "شحن 1000 جوهرة", price: 5000, category: "بطاقات رقمية" }
+                { id: 101, name: "PlayStation 5 Pro", price: 650000, category: "أجهزة", image: "https://via.placeholder.com/400" },
+                { id: 102, name: "GTA VI", price: 60000, category: "ألعاب", image: "https://via.placeholder.com/400" },
+                { id: 103, name: "شحن 1000 جوهرة", price: 5000, category: "بطاقات رقمية", image: "https://via.placeholder.com/400" }
             ]));
         }
         if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
@@ -399,14 +399,17 @@
     function updateDashboard() {
         const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
         const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
-        const completedTotal = orders.filter(o => o.status === 'completed').reduce((s,o) => s + o.total, 0);
+        const completedTotal = orders.filter(o => o.status === 'completed' || o.status === 'مكتمل').reduce((s,o) => s + o.total, 0);
         
         document.getElementById('totalOrders').innerText = orders.length;
         document.getElementById('totalRevenue').innerText = `${completedTotal.toLocaleString()} ${currentCurrency}`;
         document.getElementById('totalProducts').innerText = products.length;
 
         const recent = orders.slice().reverse().slice(0,5);
-        document.getElementById('recentOrdersBody').innerHTML = recent.map(o => `<tr><td>#${o.id}</td><td>${o.customerName}</td><td>${o.total.toLocaleString()} ${currentCurrency}</td><td><span style="color:${o.status === 'completed' ? '#4CAF50':'#FF9800'}">${o.status === 'completed' ? 'مكتمل' : 'قيد الانتظار'}</span></td></tr>`).join('');
+        document.getElementById('recentOrdersBody').innerHTML = recent.map(o => {
+            const isComp = o.status === 'completed' || o.status === 'مكتمل';
+            return `<tr><td>#${o.id}</td><td>${o.customerName || 'عميل المتجر'}</td><td>${o.total.toLocaleString()} ${currentCurrency}</td><td><span style="color:${isComp ? '#4CAF50':'#FF9800'}">${isComp ? 'مكتمل' : 'قيد الانتظار'}</span></td></tr>`;
+        }).join('');
         
         renderProductsList();
         renderOrdersList();
@@ -435,10 +438,10 @@
         let products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
         
         if (id) {
-            products = products.map(p => p.id == id ? { id: Number(id), name, price, category } : p);
+            products = products.map(p => p.id == id ? { id: Number(id), name, price, category, image: p.image || 'https://via.placeholder.com/400' } : p);
             alert("تم تحديث المنتج بنجاح!");
         } else {
-            products.push({ id: Date.now(), name, price, category });
+            products.push({ id: Date.now(), name, price, category, image: 'https://via.placeholder.com/400', premium: price > 20000 });
             alert("تم إضافة المنتج بنجاح!");
         }
         
@@ -478,16 +481,19 @@
         const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
         const tbody = document.getElementById('adminOrdersContainer');
         if (!orders.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">لا توجد طلبات مسجلة.</td></tr>'; return; }
-        tbody.innerHTML = orders.map(o => `
-            <tr>
-                <td>#${o.id}</td>
-                <td><strong>${o.customerName}</strong></td>
-                <td>${o.phone || 'غير مسجل'}</td>
-                <td>${o.total.toLocaleString()} ${currentCurrency}</td>
-                <td><span style="color:${o.status === 'completed' ? '#4CAF50':'#FF9800'}">${o.status === 'completed' ? 'مكتمل' : 'قيد الانتظار'}</span></td>
-                <td>${o.status === 'pending' ? `<button class="btn-status" onclick="toggleOrderStatus(${o.id})">تحديد كمكتمل</button>` : '<span style="color:#4CAF50;"><i class="bi bi-check2-all"></i> تم التسليم</span>'}</td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = orders.map(o => {
+            const isComp = o.status === 'completed' || o.status === 'مكتمل';
+            return `
+                <tr>
+                    <td>#${o.id}</td>
+                    <td><strong>${o.customerName || 'عميل المتجر'}</strong></td>
+                    <td>${o.phone || 'غير مسجل'}</td>
+                    <td>${o.total.toLocaleString()} ${currentCurrency}</td>
+                    <td><span style="color:${isComp ? '#4CAF50':'#FF9800'}">${isComp ? 'مكتمل' : 'قيد الانتظار'}</span></td>
+                    <td>${!isComp ? `<button class="btn-status" onclick="toggleOrderStatus(${o.id})">تحديد كمكتمل</button>` : '<span style="color:#4CAF50;"><i class="bi bi-check2-all"></i> تم التسليم</span>'}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     window.toggleOrderStatus = function(id) {
@@ -499,8 +505,8 @@
     };
 
     function renderStatistics(orders) {
-        const completed = orders.filter(o => o.status === 'completed').length;
-        const pending = orders.filter(o => o.status === 'pending').length;
+        const completed = orders.filter(o => o.status === 'completed' || o.status === 'مكتمل').length;
+        const pending = orders.filter(o => o.status === 'pending' || o.status === 'قيد الانتظار').length;
         const avg = orders.length ? Math.round(orders.reduce((s,o) => s+o.total,0)/orders.length) : 0;
         document.getElementById('adminStatsContainer').innerHTML = `
             <div class="stat-card" style="border-color:#4CAF50;"><i class="bi bi-check-circle" style="color:#4CAF50;"></i><h3>الطلبات المكتملة</h3><p>${completed}</p></div>
@@ -512,7 +518,7 @@
     function renderCustomersList(orders) {
         const map = new Map();
         orders.forEach(o => {
-            const name = o.customerName;
+            const name = o.customerName || 'عميل المتجر';
             if (!map.has(name)) map.set(name, { phone: o.phone || 'لا يوجد هاتف', count: 0 });
             map.get(name).count++;
         });
@@ -564,65 +570,26 @@
                 checkSecurityAccess();
                 updateDashboard();
                 alert("تم استيراد كافة البيانات بنجاح والمزامنة فوراً!");
-                // بث التحديث للمتجر الرئيسي
                 window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.PRODUCTS, newValue: JSON.stringify(data.products || []) }));
             } catch(err) { alert("صيغة الملف غير مدعومة أو تالفة."); }
         };
         reader.readAsText(file);
     }
 
-    // المزامنة الفورية عند حدوث أي تعديل خارجي من صفحة المتجر
+    // استماع مباشر للتغيرات القادمة من صفحة المتجر (مثل طلب جديد)
     window.addEventListener('storage', (e) => {
         if (Object.values(STORAGE_KEYS).includes(e.key)) {
-            console.log(`تزامن مباشر: تحديث في المتجر على ${e.key}`);
             loadSettings();
             updateDashboard();
         }
     });
 
-    // التنفيذ الأولي عند الإقلاع
+    // إقلاع النظام لأول مرة
     initData();
     loadSettings();
     checkSecurityAccess();
     updateDashboard();
-// 1. تعريف المفاتيح الموحدة لضمان مطابقة البيانات بين المتجر واللوحة
-const STORAGE_KEYS = {
-    PRODUCTS: 'games_store_products',
-    ORDERS: 'games_store_orders',
-    SETTINGS: 'games_store_settings',
-    SECURITY: 'games_store_security'
-};
-
-// 2. مستمع الأحداث الذكي للمزامنة الفورية والتلقائية
-window.addEventListener('storage', (event) => {
-    // التحقق مما إذا كان التغيير الذي حدث يخص أحد مفاتيح متجرنا
-    if (Object.values(STORAGE_KEYS).includes(event.key)) {
-        console.log(`[تزامن تلقائي] تم رصد تحديث خارجي للمفتاح: ${event.key}`);
-        
-        // هنا نقوم باستدعاء دوال التحديث الخاصة بكل صفحة
-        if (typeof updateDashboard === 'function') {
-            // إذا كنا في صفحة اللوحة: تحديث العدادات والجداول
-            updateDashboard(); 
-        }
-        
-        if (typeof loadSettings === 'function') {
-            // إذا تغيرت الألوان أو الثيم أو اسم المتجر: قم بإعادة تحميلها فوراً
-            loadSettings(); 
-        }
-        
-        if (typeof renderStoreProducts === 'function') {
-            // إذا كنا في واجهة المتجر: قم بإعادة عرض المنتجات بالأسعار الجديدة
-            renderStoreProducts(); 
-        }
-        
-        if (typeof updateCartBadge === 'function') {
-            // إذا تم تحديث أي شيء يخص السلة
-            updateCartBadge();
-        }
-    }
-});
-
-    
 </script>
+
 </body>
 </html>
