@@ -585,6 +585,44 @@
     loadSettings();
     checkSecurityAccess();
     updateDashboard();
+// 1. تعريف المفاتيح الموحدة لضمان مطابقة البيانات بين المتجر واللوحة
+const STORAGE_KEYS = {
+    PRODUCTS: 'games_store_products',
+    ORDERS: 'games_store_orders',
+    SETTINGS: 'games_store_settings',
+    SECURITY: 'games_store_security'
+};
+
+// 2. مستمع الأحداث الذكي للمزامنة الفورية والتلقائية
+window.addEventListener('storage', (event) => {
+    // التحقق مما إذا كان التغيير الذي حدث يخص أحد مفاتيح متجرنا
+    if (Object.values(STORAGE_KEYS).includes(event.key)) {
+        console.log(`[تزامن تلقائي] تم رصد تحديث خارجي للمفتاح: ${event.key}`);
+        
+        // هنا نقوم باستدعاء دوال التحديث الخاصة بكل صفحة
+        if (typeof updateDashboard === 'function') {
+            // إذا كنا في صفحة اللوحة: تحديث العدادات والجداول
+            updateDashboard(); 
+        }
+        
+        if (typeof loadSettings === 'function') {
+            // إذا تغيرت الألوان أو الثيم أو اسم المتجر: قم بإعادة تحميلها فوراً
+            loadSettings(); 
+        }
+        
+        if (typeof renderStoreProducts === 'function') {
+            // إذا كنا في واجهة المتجر: قم بإعادة عرض المنتجات بالأسعار الجديدة
+            renderStoreProducts(); 
+        }
+        
+        if (typeof updateCartBadge === 'function') {
+            // إذا تم تحديث أي شيء يخص السلة
+            updateCartBadge();
+        }
+    }
+});
+
+    
 </script>
 </body>
 </html>
