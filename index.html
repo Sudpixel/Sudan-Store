@@ -810,98 +810,16 @@
 <a href="https://wa.me/249115169965" target="_blank" class="whatsapp-float"><i class="bi bi-headset"></i></a>
 
 <script>
-    // === كود التزامن بين نظام الإدارة ومتجر الألعاب ===
-(function syncStoreAndGame() {
-    const ADMIN_KEY = 'advanced_store_data';
-    const GAME_PRODUCTS_KEY = 'games_store_products';
-    const GAME_ORDERS_KEY = 'games_store_orders';
-    const GAME_CART_KEY = 'games_store_cart';
-    
-    // دالة لمزامنة المنتجات من الإدارة إلى الألعاب
-    function syncProductsFromAdmin() {
-        const adminData = localStorage.getItem(ADMIN_KEY);
-        if (adminData) {
-            const parsed = JSON.parse(adminData);
-            if (parsed.products && Array.isArray(parsed.products)) {
-                // تحويل المنتجات إلى صيغة متجر الألعاب
-                const gameProducts = parsed.products.map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    category: p.category || 'ألعاب',
-                    price: p.price,
-                    image: p.image?.startsWith('data:') ? p.image : (p.image || 'https://via.placeholder.com/400'),
-                    premium: p.price > 2000
-                }));
-                localStorage.setItem(GAME_PRODUCTS_KEY, JSON.stringify(gameProducts));
-            }
-        }
-    }
-    
-    // دالة لمزامنة الطلبات الجديدة من الألعاب إلى الإدارة
-    function syncOrdersToAdmin() {
-        const gameOrders = localStorage.getItem(GAME_ORDERS_KEY);
-        const adminData = localStorage.getItem(ADMIN_KEY);
-        if (gameOrders && adminData) {
-            const ordersGame = JSON.parse(gameOrders);
-            const admin = JSON.parse(adminData);
-            if (!admin.orders) admin.orders = [];
-            
-            let updated = false;
-            ordersGame.forEach(order => {
-                // تحويل صيغة طلب الألعاب إلى صيغة الإدارة
-                const exists = admin.orders.some(o => o.id === order.id);
-                if (!exists) {
-                    admin.orders.push({
-                        id: order.id,
-                        productId: order.items?.[0]?.id || 0,
-                        quantity: order.items?.reduce((s, i) => s + i.quantity, 0) || 1,
-                        total: order.total,
-                        status: order.status === 'قيد الانتظار' ? 'pending' : 'completed',
-                        date: order.createdAt || new Date().toISOString(),
-                        customer: 'عميل المتجر',
-                        customerId: null,
-                        couponCode: null
-                    });
-                    updated = true;
-                }
-            });
-            if (updated) {
-                localStorage.setItem(ADMIN_KEY, JSON.stringify(admin));
-                // إشعار التحديث لبقية النوافذ
-                window.dispatchEvent(new StorageEvent('storage', { key: ADMIN_KEY, newValue: JSON.stringify(admin) }));
-            }
-        }
-    }
-    
-    // مراقبة التغييرات في localStorage
-    window.addEventListener('storage', (e) => {
-        if (e.key === ADMIN_KEY && e.newValue) {
-            syncProductsFromAdmin();
-        }
-        if (e.key === GAME_ORDERS_KEY && e.newValue) {
-            syncOrdersToAdmin();
-        }
-    });
-    
-    // التنفيذ الأولي
-    syncProductsFromAdmin();
-    syncOrdersToAdmin();
-    
-    // تحديث دوري (اختياري) لتجنب فقدان التغييرات في نفس النافذة
-    setInterval(() => {
-        syncProductsFromAdmin();
-        syncOrdersToAdmin();
-    }, 5000);
-})();
-    // ========== مزامنة كاملة مع لوحة التحكم ==========
+    // 1. المفاتيح الموحدة للنظام بالكامل
     const STORAGE_KEYS = {
         PRODUCTS: 'games_store_products',
         ORDERS: 'games_store_orders',
-        ADMINS: 'games_store_admins',
+        SETTINGS: 'games_store_settings',
+        SECURITY: 'games_store_security',
         CART: 'games_store_cart'
     };
 
-    // المنتجات الافتراضية (متطابقة مع لوحة التحكم)
+    // المنتجات الافتراضية للمتجر في حال كان الـ LocalStorage فارغاً
     const defaultProducts = [
         { id: 1, name: "شحن 1200 جوهرة فري فاير", category: "Free Fire", price: 14900, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&auto=format", premium: true },
         { id: 2, name: "شدة 660 UC + 60 هدية ببجي", category: "PUBG", price: 18500, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&auto=format", premium: false },
@@ -911,22 +829,38 @@
         { id: 6, name: "فيفا 26 نقاط مستقبلية", category: "EA FC", price: 33900, image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&auto=format", premium: false }
     ];
 
-    // تهيئة المنتجات في localStorage إذا لم تكن موجودة
-    function initProducts() {
+    let currentCurrency = "SDG";
+
+    function initStoreData() {
         if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
             localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(defaultProducts));
         }
         if (!localStorage.getItem(STORAGE_KEYS.ORDERS)) {
             localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([]));
         }
+        applyDynamicSettings();
     }
 
-    // الحصول على المنتجات الحية من localStorage
+    // دالة لتطبيق إعدادات اللوحة (اسم المتجر، الألوان، العملة) تلقائياً على المتجر
+    function applyDynamicSettings() {
+        const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS));
+        if (settings) {
+            if (settings.storeName) {
+                const logoContainer = document.querySelector('.logo');
+                if(logoContainer) logoContainer.innerHTML = `${settings.storeName.split(' ')[0]} <span style="color:${settings.primaryColor || '#6D001A'}">${settings.storeName.split(' ').slice(1).join(' ') || ''}</span>`;
+            }
+            if (settings.currency) currentCurrency = settings.currency;
+            
+            // تطبيق الألوان المخصصة القادمة من إدارة اللوحة
+            document.documentElement.style.setProperty('--primary', settings.primaryColor || '#6D001A');
+            document.documentElement.style.setProperty('--secondary', settings.accentColor || '#fec400');
+        }
+    }
+
     function getProducts() {
         return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || defaultProducts;
     }
 
-    // السلة (محفوظة محلياً)
     let cart = JSON.parse(localStorage.getItem(STORAGE_KEYS.CART)) || [];
 
     function saveCart() {
@@ -943,13 +877,13 @@
             <div class="game-card">
                 <div class="card-img">
                     ${p.premium ? '<span class="badge-premium">PREMIUM</span>' : ''}
-                    <img src="${p.image}" alt="${p.name}" loading="lazy">
+                    <img src="${p.image || 'https://via.placeholder.com/400'}" alt="${p.name}" loading="lazy">
                 </div>
                 <div class="card-content">
                     <div class="game-title">${p.name}</div>
-                    <div class="game-cat"><i class="bi bi-joystick"></i> ${p.category}</div>
+                    <div class="game-cat"><i class="bi bi-joystick"></i> ${p.category || 'عام'}</div>
                     <div class="price-row">
-                        <div class="price">${p.price.toLocaleString()} <small>SDG</small></div>
+                        <div class="price">${p.price.toLocaleString()} <small>${currentCurrency}</small></div>
                         <button class="add-cart" data-id="${p.id}"><i class="bi bi-bag-plus"></i> أضف</button>
                     </div>
                 </div>
@@ -986,17 +920,17 @@
         if(!container) return;
         if(cart.length === 0) {
             container.innerHTML = '<p style="color:#B5B5B5;">السلة فارغة، أضف ألعاباً فاخرة</p>';
-            if(totalSpan) totalSpan.innerText = "0 SDG";
+            if(totalSpan) totalSpan.innerText = `0 ${currentCurrency}`;
             return;
         }
         let total = 0;
         container.innerHTML = cart.map(item => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
-            return `<div class="cart-item"><div class="cart-item-info"><h4>${item.name}</h4><p>${item.price.toLocaleString()} SDG</p></div><div class="cart-qty"><button class="qty-minus" data-id="${item.id}">-</button><span>${item.quantity}</span><button class="qty-plus" data-id="${item.id}">+</button></div></div>`;
+            return `<div class="cart-item"><div class="cart-item-info"><h4>${item.name}</h4><p>${item.price.toLocaleString()} ${currentCurrency}</p></div><div class="cart-qty"><button class="qty-minus" data-id="${item.id}">-</button><span>${item.quantity}</span><button class="qty-plus" data-id="${item.id}">+</button></div></div>`;
         }).join('');
-        if(totalSpan) totalSpan.innerText = total.toLocaleString() + " SDG";
-        // ربط أزرار +/-
+        if(totalSpan) totalSpan.innerText = `${total.toLocaleString()} ${currentCurrency}`;
+        
         document.querySelectorAll('.qty-minus').forEach(btn => {
             btn.addEventListener('click', () => changeQty(parseInt(btn.dataset.id), -1));
         });
@@ -1026,7 +960,7 @@
         toast.style.position = "fixed";
         toast.style.bottom = "90px";
         toast.style.right = "20px";
-        toast.style.backgroundColor = "#6D001A";
+        toast.style.backgroundColor = "var(--primary)";
         toast.style.color = "white";
         toast.style.padding = "12px 24px";
         toast.style.borderRadius = "30px";
@@ -1037,41 +971,51 @@
         setTimeout(() => toast.remove(), 2500);
     }
 
-    // حفظ الطلب في localStorage ليتزامن مع لوحة التحكم
-    function saveOrder() {
-        if(cart.length === 0) return false;
-        const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)) || [];
-        const newOrder = {
-            id: Date.now(),
-            items: cart.map(item => ({ id: item.id, name: item.name, quantity: item.quantity, price: item.price })),
-            total: cart.reduce((sum, i) => sum + (i.price * i.quantity), 0),
-            status: "قيد الانتظار",
-            createdAt: new Date().toISOString()
-        };
-        orders.push(newOrder);
-        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
-        return newOrder;
-    }
-
     function checkoutWhatsapp() {
         if(cart.length === 0) { showToast("السلة فارغة"); return; }
-        // حفظ الطلب في localStorage قبل إرسال الواتساب
-        const order = saveOrder();
-        if(!order) return;
-        // إعداد رسالة واتساب
+        
+        const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)) || [];
+        const orderId = Date.now();
+        const totalAmount = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        
+        // إنشاء الهيكل المتوافق مع شاشة التحكم للمسؤول
+        const newOrder = {
+            id: orderId,
+            customerName: "عميل المتجر عبر الويب",
+            phone: "واتساب",
+            total: totalAmount,
+            status: "قيد الانتظار",
+            items: cart.map(item => ({ id: item.id, name: item.name, quantity: item.quantity, price: item.price })),
+            createdAt: new Date().toISOString()
+        };
+        
+        orders.push(newOrder);
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+        
+        // إعداد رسالة واتساب الشحن للعميل
         let msg = `🛒 *طلب شراء من GAMES STORE*%0A%0A`;
-        let total = 0;
-        cart.forEach(p => { total += p.price * p.quantity; msg += `• ${p.name} × ${p.quantity} = ${(p.price * p.quantity).toLocaleString()} SDG%0A`; });
-        msg += `%0A💰 *الإجمالي: ${total.toLocaleString()} SDG*%0A%0A📍 العميل: السودان - الرجاء تأكيد الطلب وشكراً`;
-        msg += `%0A%0A📌 رقم الطلب: ${order.id}`;
+        cart.forEach(p => { msg += `• ${p.name} × ${p.quantity} = ${(p.price * p.quantity).toLocaleString()} ${currentCurrency}%0A`; });
+        msg += `%0A💰 *الإجمالي: ${totalAmount.toLocaleString()} ${currentCurrency}*%0A%0A📌 رقم الطلب الفوري للتحقق: ${orderId}`;
+        
         window.open(`https://wa.me/249115169965?text=${msg}`, '_blank');
-        // تفريغ السلة بعد الطلب
+        
+        // تحديث النوافذ المفتوحة الأخرى تلقائياً
+        window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.ORDERS, newValue: JSON.stringify(orders) }));
+        
         cart = [];
         saveCart();
-        showToast("تم إرسال الطلب بنجاح! سيتم التواصل معك قريباً.");
     }
 
-    // أحداث DOM
+    // مستمع التغييرات للبث الفوري والأوتوماتيكي بين الصفحتين
+    window.addEventListener('storage', (event) => {
+        if (Object.values(STORAGE_KEYS).includes(event.key)) {
+            applyDynamicSettings();
+            renderProducts();
+            updateCartUI();
+        }
+    });
+
+    // أحداث الـ DOM الأساسية
     const cartSidebar = document.getElementById("cartSidebar");
     const searchModal = document.getElementById("searchModal");
     const cartIconBtn = document.getElementById("cartIconBtn");
@@ -1095,25 +1039,23 @@
     if(closeSearchModal) closeSearchModal.addEventListener("click", () => searchModal.classList.remove("active"));
     if(menuBtn && navMenu) menuBtn.addEventListener("click", () => navMenu.classList.toggle("active"));
 
-    // إغلاق النوافذ عند الضغط على الخلفية
     if(cartSidebar) cartSidebar.addEventListener("click", (e) => { if(e.target === cartSidebar) cartSidebar.classList.remove("active"); });
     if(searchModal) searchModal.addEventListener("click", (e) => { if(e.target === searchModal) searchModal.classList.remove("active"); });
 
-    // البحث المباشر باستخدام المنتجات من localStorage
     if(liveSearchInput) {
         liveSearchInput.addEventListener("input", function() {
             const val = this.value.trim().toLowerCase();
             if(!val) { if(liveResults) liveResults.innerHTML = ""; return; }
             const products = getProducts();
-            const filtered = products.filter(p => p.name.toLowerCase().includes(val) || p.category.toLowerCase().includes(val));
+            const filtered = products.filter(p => p.name.toLowerCase().includes(val) || (p.category && p.category.toLowerCase().includes(val)));
             if(liveResults) {
                 if(filtered.length === 0) liveResults.innerHTML = "<p style='color:#B5B5B5;'>لا توجد نتائج</p>";
                 else {
                     liveResults.innerHTML = filtered.map(p => `
                         <div style="padding:10px; border-bottom:1px solid #2a2a2a; display:flex; gap:12px; align-items:center;">
-                            <img src="${p.image}" width="45" height="45" style="border-radius:12px;">
-                            <div><strong>${p.name}</strong><br>${p.price.toLocaleString()} SDG</div>
-                            <button class="search-add-cart" data-id="${p.id}" style="margin-right:auto; background:#6D001A; border:none; padding:6px 12px; border-radius:20px; color:white;">أضف</button>
+                            <img src="${p.image || 'https://via.placeholder.com/400'}" width="45" height="45" style="border-radius:12px;">
+                            <div><strong>${p.name}</strong><br>${p.price.toLocaleString()} ${currentCurrency}</div>
+                            <button class="search-add-cart" data-id="${p.id}" style="margin-right:auto; background:var(--primary); border:none; padding:6px 12px; border-radius:20px; color:white;">أضف</button>
                         </div>
                     `).join('');
                     document.querySelectorAll('.search-add-cart').forEach(btn => {
@@ -1132,48 +1074,12 @@
         });
     }
 
-    // بدء التشغيل
-    initProducts();
+    // التنفيذ الفوري عند تحميل المتجر
+    initStoreData();
     renderProducts();
     updateCartUI();
     updateCartCount();
-    // 1. تعريف المفاتيح الموحدة لضمان مطابقة البيانات بين المتجر واللوحة
-const STORAGE_KEYS = {
-    PRODUCTS: 'games_store_products',
-    ORDERS: 'games_store_orders',
-    SETTINGS: 'games_store_settings',
-    SECURITY: 'games_store_security'
-};
-
-// 2. مستمع الأحداث الذكي للمزامنة الفورية والتلقائية
-window.addEventListener('storage', (event) => {
-    // التحقق مما إذا كان التغيير الذي حدث يخص أحد مفاتيح متجرنا
-    if (Object.values(STORAGE_KEYS).includes(event.key)) {
-        console.log(`[تزامن تلقائي] تم رصد تحديث خارجي للمفتاح: ${event.key}`);
-        
-        // هنا نقوم باستدعاء دوال التحديث الخاصة بكل صفحة
-        if (typeof updateDashboard === 'function') {
-            // إذا كنا في صفحة اللوحة: تحديث العدادات والجداول
-            updateDashboard(); 
-        }
-        
-        if (typeof loadSettings === 'function') {
-            // إذا تغيرت الألوان أو الثيم أو اسم المتجر: قم بإعادة تحميلها فوراً
-            loadSettings(); 
-        }
-        
-        if (typeof renderStoreProducts === 'function') {
-            // إذا كنا في واجهة المتجر: قم بإعادة عرض المنتجات بالأسعار الجديدة
-            renderStoreProducts(); 
-        }
-        
-        if (typeof updateCartBadge === 'function') {
-            // إذا تم تحديث أي شيء يخص السلة
-            updateCartBadge();
-        }
-    }
-});
-
 </script>
+
 </body>
     </html> 
