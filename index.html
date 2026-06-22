@@ -1462,203 +1462,399 @@
 
     <div class="toast" id="toast"></div>
 
-    <script>
-        const navbar = document.getElementById('navbar');
-        const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('navLinks');
-        const overlayBg = document.getElementById('overlayBg');
-        const toast = document.getElementById('toast');
-        const WHATSAPP_NUMBER = '249115169965';
+<script>
+    // ============ الثوابت والإعدادات ============
+    const STORAGE_KEY = 'gamesStoreAdminData';
+    const WHATSAPP_NUMBER = '249115169965';
+    
+    const navbar = document.getElementById('navbar');
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    const overlayBg = document.getElementById('overlayBg');
+    const toast = document.getElementById('toast');
 
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) navbar.classList.add('scrolled');
-            else navbar.classList.remove('scrolled');
+    // ============ دوال قراءة وحفظ البيانات المشتركة ============
+    function getSharedData() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                // التأكد من وجود جميع الحقول الأساسية
+                if (!data.orders) data.orders = [];
+                if (!data.services) data.services = [];
+                if (!data.customers) data.customers = [];
+                if (!data.offers) data.offers = [];
+                if (!data.content) data.content = {};
+                if (!data.nextId) data.nextId = 1;
+                return data;
+            }
+        } catch (e) {
+            console.error('خطأ في قراءة البيانات:', e);
+        }
+        // إنشاء هيكل بيانات افتراضي إذا لم يكن موجوداً
+        return createDefaultData();
+    }
+
+    function createDefaultData() {
+        const defaultData = {
+            orders: [],
+            services: [
+                { id: 1, name: 'شحن PUBG 600 + 60 UC', category: 'موبايل', price: 9900, active: true },
+                { id: 2, name: 'شحن Free Fire 520 دايموند', category: 'موبايل', price: 8500, active: true },
+                { id: 3, name: 'بطاقة Steam 10 دولار', category: 'بطاقات', price: 15000, active: true },
+                { id: 4, name: 'بطاقة PlayStation 20 دولار', category: 'كونسول', price: 27200, active: true },
+                { id: 5, name: 'شحن MLBB 503 دايموند', category: 'موبايل', price: 7200, active: true },
+                { id: 6, name: 'بطاقة Google Play 10 دولار', category: 'بطاقات', price: 14500, active: true },
+                { id: 7, name: 'شحن COD Mobile', category: 'موبايل', price: 9500, active: true },
+                { id: 8, name: 'بطاقة Xbox 20 دولار', category: 'كونسول', price: 16000, active: true },
+            ],
+            customers: [
+                { id: 1, name: 'أحمد محمد', phone: '0912345678', ordersCount: 5, date: '2026-05-10' },
+                { id: 2, name: 'منى عبدالله', phone: '0923456789', ordersCount: 3, date: '2026-05-22' },
+            ],
+            offers: [
+                { id: 1, title: 'خصم 15% على PlayStation', serviceId: 4, discount: 15, active: true },
+            ],
+            content: {
+                heroText: 'شحن فوري وآمن لجميع ألعابك المفضلة',
+                stepsText: '4 خطوات فقط تفصلك عن شحن لعبتك المفضلة',
+                whatsappNumber: WHATSAPP_NUMBER
+            },
+            nextId: 9
+        };
+        saveSharedData(defaultData);
+        return defaultData;
+    }
+
+    function saveSharedData(data) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            console.error('خطأ في حفظ البيانات:', e);
+        }
+    }
+
+    // ============ تحديث واجهة المتجر ديناميكياً ============
+    function updateStoreFromAdmin() {
+        const data = getSharedData();
+        
+        // تحديث المنتجات الديناميكية
+        renderDynamicProducts(data);
+        
+        // تحديث محتوى النصوص من لوحة الإدارة
+        if (data.content) {
+            const heroTitleEl = document.querySelector('.hero-title');
+            if (heroTitleEl && data.content.heroText) {
+                // تحديث النصوص الظاهرة حسب إعدادات المسؤول
+            }
+            const whatsappFloat = document.querySelector('.whatsapp-float');
+            const adminWhatsapp = data.content.whatsappNumber || WHATSAPP_NUMBER;
+            if (whatsappFloat) {
+                whatsappFloat.href = `https://wa.me/${adminWhatsapp}?text=السلام%20عليكم%20أريد%20الاستفسار%20عن%20خدمات%20الشحن`;
+            }
+        }
+    }
+
+    function renderDynamicProducts(data) {
+        const productsGrid = document.querySelector('.products-grid');
+        if (!productsGrid) return;
+        
+        // الحصول على الخدمات النشطة فقط
+        const activeServices = data.services.filter(s => s.active !== false);
+        
+        // أيقونات حسب الفئة
+        const categoryIcons = {
+            'موبايل': 'bi bi-phone-fill',
+            'PC': 'bi bi-laptop-fill',
+            'كونسول': 'bi bi-controller',
+            'بطاقات': 'bi bi-gift-fill',
+            'اشتراكات': 'bi bi-calendar-check-fill'
+        };
+        
+        // بناء كروت المنتجات ديناميكياً
+        productsGrid.innerHTML = activeServices.map((service, index) => {
+            const icon = categoryIcons[service.category] || 'bi bi-gem';
+            const offer = data.offers.find(o => o.serviceId === service.id && o.active);
+            
+            let priceHTML = '';
+            if (offer) {
+                const discountedPrice = Math.round(service.price * (1 - offer.discount / 100));
+                priceHTML = `
+                    <span class="original">${service.price.toLocaleString('ar-SD')} ج.س</span>
+                    ${discountedPrice.toLocaleString('ar-SD')} <span class="currency">ج.س</span>
+                `;
+            } else {
+                priceHTML = `${service.price.toLocaleString('ar-SD')} <span class="currency">ج.س</span>`;
+            }
+            
+            const badgeHTML = offer ? `<span class="product-badge">خصم ${offer.discount}%</span>` : 
+                              (index === 0 ? '<span class="product-badge">الأكثر طلباً</span>' : '');
+            
+            return `
+                <div class="product-card reveal">
+                    <div class="product-card-image">
+                        <i class="${icon}"></i>
+                        ${badgeHTML}
+                    </div>
+                    <div class="product-card-body">
+                        <h3>${service.name}</h3>
+                        <span class="game-name">${service.category}</span>
+                        <div class="product-price">${priceHTML}</div>
+                        <button class="btn-buy" onclick="scrollToOrder('${service.name}', ${service.price})">
+                            <i class="bi bi-cart-fill"></i> اطلب الآن
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // إعادة تفعيل تأثيرات الظهور
+        setTimeout(() => {
+            document.querySelectorAll('.products-grid .reveal').forEach(el => {
+                revealObserver.observe(el);
+            });
+        }, 100);
+        
+        // تحديث قائمة الخدمات في نموذج الطلب
+        updateOrderFormSelect(data);
+    }
+
+    function updateOrderFormSelect(data) {
+        const gameSelect = document.getElementById('gameSelect');
+        if (!gameSelect) return;
+        
+        const activeServices = data.services.filter(s => s.active !== false);
+        
+        // الاحتفاظ بالخيار الافتراضي الأول
+        let optionsHTML = '<option value="">-- اختر الخدمة --</option>';
+        
+        // تجميع الخدمات حسب الفئة
+        const categories = {};
+        activeServices.forEach(s => {
+            if (!categories[s.category]) categories[s.category] = [];
+            categories[s.category].push(s);
         });
+        
+        // إنشاء مجموعات الخيارات
+        const categoryNames = {
+            'موبايل': '🎮 شحن ألعاب الموبايل',
+            'PC': '💻 شحن ألعاب PC',
+            'كونسول': '🕹️ شحن ألعاب الكونسول',
+            'بطاقات': '🎁 بطاقات هدايا رقمية',
+            'اشتراكات': '📅 اشتراكات الألعاب'
+        };
+        
+        for (const [category, services] of Object.entries(categories)) {
+            const groupName = categoryNames[category] || category;
+            optionsHTML += `<optgroup label="${groupName}">`;
+            services.forEach(s => {
+                optionsHTML += `<option value="${s.id}" data-price="${s.price}" data-name="${s.name}">${s.name} - ${s.price.toLocaleString('ar-SD')} ج.س</option>`;
+            });
+            optionsHTML += '</optgroup>';
+        }
+        
+        optionsHTML += '<option value="other">خدمة أخرى</option>';
+        gameSelect.innerHTML = optionsHTML;
+    }
 
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('open');
-            overlayBg.classList.toggle('active');
-            document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
-        });
+    // ============ مزامنة الطلبات من المتجر إلى لوحة الإدارة ============
+    function syncOrderToAdmin(orderData) {
+        const data = getSharedData();
+        
+        // إضافة الطلب الجديد
+        const newOrder = {
+            id: data.nextId,
+            customer: orderData.customerName,
+            phone: orderData.customerPhone,
+            service: orderData.serviceName,
+            amount: orderData.amount || 0,
+            status: 'new',
+            date: new Date().toISOString().split('T')[0]
+        };
+        data.orders.push(newOrder);
+        data.nextId++;
+        
+        // تحديث أو إضافة العميل
+        const existingCustomer = data.customers.find(c => c.phone === orderData.customerPhone);
+        if (existingCustomer) {
+            existingCustomer.ordersCount = (existingCustomer.ordersCount || 0) + 1;
+            existingCustomer.date = new Date().toISOString().split('T')[0];
+        } else {
+            data.customers.push({
+                id: data.nextId,
+                name: orderData.customerName,
+                phone: orderData.customerPhone,
+                ordersCount: 1,
+                date: new Date().toISOString().split('T')[0]
+            });
+            data.nextId++;
+        }
+        
+        // حفظ البيانات
+        saveSharedData(data);
+        console.log('✅ تمت مزامنة الطلب مع لوحة الإدارة:', newOrder);
+    }
 
-        overlayBg.addEventListener('click', () => {
+    // ============ أحداث الواجهة ============
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+    });
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('open');
+        overlayBg.classList.toggle('active');
+        document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+    });
+
+    overlayBg.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('open');
+        overlayBg.classList.remove('active');
+        document.body.style.overflow = '';
+    });
+
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
             hamburger.classList.remove('active');
             navLinks.classList.remove('open');
             overlayBg.classList.remove('active');
             document.body.style.overflow = '';
+            navLinks.querySelectorAll('a').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
         });
+    });
 
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('open');
-                overlayBg.classList.remove('active');
-                document.body.style.overflow = '';
-                navLinks.querySelectorAll('a').forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-            });
+    // ============ الأسئلة الشائعة ============
+    document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const faqItem = btn.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active'));
+            if (!isActive) faqItem.classList.add('active');
         });
+    });
 
-        document.querySelectorAll('.faq-question').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const faqItem = btn.parentElement;
-                const isActive = faqItem.classList.contains('active');
-                document.querySelectorAll('.faq-item').forEach(item => item.classList.remove(
-                'active'));
-                if (!isActive) faqItem.classList.add('active');
-            });
+    // ============ تأثيرات الظهور ============
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
         });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    revealElements.forEach(el => revealObserver.observe(el));
 
-        const revealElements = document.querySelectorAll('.reveal');
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    revealObserver.unobserve(entry.target);
+    // ============ وظائف مساعدة ============
+    function scrollToOrder(serviceName = '', servicePrice = 0) {
+        const orderSection = document.getElementById('order-form');
+        if (orderSection) {
+            orderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // تعبئة النموذج تلقائياً إذا توفرت البيانات
+            if (serviceName) {
+                const gameSelect = document.getElementById('gameSelect');
+                if (gameSelect) {
+                    // البحث عن الخيار المناسب
+                    for (let i = 0; i < gameSelect.options.length; i++) {
+                        if (gameSelect.options[i].text.includes(serviceName)) {
+                            gameSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
                 }
-            });
-        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-        revealElements.forEach(el => revealObserver.observe(el));
-
-        function scrollToOrder() {
-            const orderSection = document.getElementById('order-form');
-            if (orderSection) orderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function showPolicy(type) {
-            const policies = {
-                terms: 'شروط الخدمة: باستخدامك لموقع Games Store فإنك توافق على جميع الشروط. الخدمة رقمية ولا يحق الاسترداد بعد إتمام الشحن بنجاح. نضمن تنفيذ الطلب خلال 5 دقائق من تأكيد الدفع.',
-                privacy: 'سياسة الخصوصية: بياناتك الشخصية محمية ولا نشاركها مع أي طرف ثالث. نستخدم بيانات الاتصال فقط للتواصل بخصوص طلبك.',
-                refund: 'سياسة الاسترداد: في حال فشل عملية الشحن بسبب خطأ منا، نضمن استرداد كامل المبلغ أو إعادة المحاولة. لا استرداد بعد نجاح الشحن.'
-            };
-            alert(policies[type]);
-        }
-
-        function getAdminData() {
-            try {
-                const saved = localStorage.getItem('gamesStoreAdminData');
-                if (saved) return JSON.parse(saved);
-            } catch (e) {}
-            return null;
-        }
-
-        function saveAdminData(data) {
-            localStorage.setItem('gamesStoreAdminData', JSON.stringify(data));
-        }
-
-        function syncOrderToAdmin(orderData) {
-            let adminData = getAdminData();
-            if (!adminData) {
-                adminData = {
-                    orders: [],
-                    services: [
-                        { id: 1, name: 'شحن PUBG 600 + 60 UC', category: 'موبايل', price: 9900, active: true },
-                        { id: 2, name: 'شحن Free Fire 520 دايموند', category: 'موبايل', price: 8500, active: true },
-                        { id: 3, name: 'بطاقة Steam 10 دولار', category: 'بطاقات', price: 15000, active: true },
-                        { id: 4, name: 'بطاقة PlayStation 20 دولار', category: 'كونسول', price: 27200, active: true },
-                        { id: 5, name: 'شحن MLBB 503 دايموند', category: 'موبايل', price: 7200, active: true },
-                        { id: 6, name: 'بطاقة Google Play 10 دولار', category: 'بطاقات', price: 14500, active: true },
-                    ],
-                    customers: [
-                        { id: 1, name: 'أحمد محمد', phone: '0912345678', ordersCount: 5, date: '2026-05-10' },
-                    ],
-                    offers: [
-                        { id: 1, title: 'خصم 15% على PlayStation', serviceId: 4, discount: 15, active: true },
-                    ],
-                    content: { heroText: 'شحن فوري وآمن', stepsText: '4 خطوات', whatsappNumber: WHATSAPP_NUMBER },
-                    nextId: 7
-                };
             }
-
-            const maxId = adminData.orders.reduce((max, o) => Math.max(max, o.id || 0), 0);
-            const newOrder = {
-                id: maxId + 1,
-                customer: orderData.customerName,
-                phone: orderData.customerPhone,
-                service: orderData.serviceName,
-                amount: orderData.amount || 0,
-                status: 'new',
-                date: new Date().toISOString().split('T')[0]
-            };
-            adminData.orders.push(newOrder);
-
-            const existingCustomer = adminData.customers.find(c => c.phone === orderData.customerPhone);
-            if (existingCustomer) {
-                existingCustomer.ordersCount = (existingCustomer.ordersCount || 0) + 1;
-            } else {
-                adminData.customers.push({
-                    id: adminData.nextId++,
-                    name: orderData.customerName,
-                    phone: orderData.customerPhone,
-                    ordersCount: 1,
-                    date: new Date().toISOString().split('T')[0]
-                });
-            }
-
-            if (!adminData.nextId) adminData.nextId = maxId + 10;
-            saveAdminData(adminData);
         }
+    }
 
-        const servicePrices = {
-            pubg: { name: 'شحن PUBG موبايل', amount: 9900 },
-            freefire: { name: 'شحن Free Fire', amount: 8500 },
-            mlbb: { name: 'شحن Mobile Legends', amount: 7200 },
-            codm: { name: 'شحن COD Mobile', amount: 9500 },
-            steam: { name: 'بطاقة Steam', amount: 15000 },
-            psn: { name: 'بطاقة PlayStation', amount: 27200 },
-            googleplay: { name: 'بطاقة Google Play', amount: 14500 },
-            xbox: { name: 'بطاقة Xbox', amount: 16000 },
-            other: { name: 'خدمة أخرى', amount: 0 }
+    function showPolicy(type) {
+        const policies = {
+            terms: 'شروط الخدمة: باستخدامك لموقع Games Store فإنك توافق على جميع الشروط. الخدمة رقمية ولا يحق الاسترداد بعد إتمام الشحن بنجاح. نضمن تنفيذ الطلب خلال 5 دقائق من تأكيد الدفع.',
+            privacy: 'سياسة الخصوصية: بياناتك الشخصية محمية ولا نشاركها مع أي طرف ثالث. نستخدم بيانات الاتصال فقط للتواصل بخصوص طلبك.',
+            refund: 'سياسة الاسترداد: في حال فشل عملية الشحن بسبب خطأ منا، نضمن استرداد كامل المبلغ أو إعادة المحاولة. لا استرداد بعد نجاح الشحن.'
         };
+        alert(policies[type]);
+    }
 
-        document.getElementById('quickOrderForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            const game = document.getElementById('gameSelect').value;
-            const playerId = document.getElementById('playerId').value.trim();
-            const notes = document.getElementById('orderNotes').value.trim();
+    // ============ معالجة نموذج الطلب ============
+    document.getElementById('quickOrderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('customerName').value.trim();
+        const phone = document.getElementById('customerPhone').value.trim();
+        const gameSelect = document.getElementById('gameSelect');
+        const selectedOption = gameSelect.options[gameSelect.selectedIndex];
+        const gameValue = gameSelect.value;
+        const playerId = document.getElementById('playerId').value.trim();
+        const notes = document.getElementById('orderNotes').value.trim();
 
-            if (!name || !phone || !game || !playerId) {
-                showToast('⚠️ الرجاء ملء جميع الحقول المطلوبة');
-                return;
-            }
+        if (!name || !phone || !gameValue || !playerId) {
+            showToast('⚠️ الرجاء ملء جميع الحقول المطلوبة');
+            return;
+        }
 
-            const serviceInfo = servicePrices[game] || { name: 'خدمة غير محددة', amount: 0 };
-            const gameName = document.getElementById('gameSelect').selectedOptions[0].text;
+        // الحصول على اسم الخدمة وسعرها
+        let serviceName, serviceAmount;
+        if (gameValue === 'other') {
+            serviceName = 'خدمة أخرى';
+            serviceAmount = 0;
+        } else {
+            serviceName = selectedOption.getAttribute('data-name') || selectedOption.text;
+            serviceAmount = parseInt(selectedOption.getAttribute('data-price')) || 0;
+        }
 
-            syncOrderToAdmin({
-                customerName: name,
-                customerPhone: phone,
-                serviceName: gameName,
-                amount: serviceInfo.amount
-            });
-
-            const message =
-                `السلام عليكم 🎮\n\nطلب شحن جديد:\n👤 الاسم: ${name}\n📱 الهاتف: ${phone}\n🎯 الخدمة: ${gameName}\n🆔 معرف اللاعب: ${playerId}\n💰 المبلغ التقريبي: ${serviceInfo.amount.toLocaleString('ar-SD')} ج.س\n📝 ملاحظات: ${notes || 'لا يوجد'}\n\nشكراً لكم!`;
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-
-            showToast('✅ تم تجهيز طلبك! جاري تحويلك للواتساب...');
-            setTimeout(() => {
-                window.open(whatsappUrl, '_blank');
-            }, 1200);
-
-            this.reset();
+        // مزامنة الطلب مع لوحة الإدارة
+        syncOrderToAdmin({
+            customerName: name,
+            customerPhone: phone,
+            serviceName: serviceName,
+            amount: serviceAmount
         });
 
-        function showToast(msg) {
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
-        }
+        // إنشاء رسالة واتساب
+        const message = `السلام عليكم 🎮\n\nطلب شحن جديد:\n👤 الاسم: ${name}\n📱 الهاتف: ${phone}\n🎯 الخدمة: ${serviceName}\n🆔 معرف اللاعب: ${playerId}\n💰 المبلغ التقريبي: ${serviceAmount ? serviceAmount.toLocaleString('ar-SD') + ' ج.س' : 'يُحدد لاحقاً'}\n📝 ملاحظات: ${notes || 'لا يوجد'}\n\nشكراً لكم!`;
+        const data = getSharedData();
+        const adminWhatsapp = (data.content && data.content.whatsappNumber) || WHATSAPP_NUMBER;
+        const whatsappUrl = `https://wa.me/${adminWhatsapp}?text=${encodeURIComponent(message)}`;
 
-        const yearSpan = document.querySelector('.footer-bottom p');
-        if (yearSpan) yearSpan.innerHTML = yearSpan.innerHTML.replace('2026', new Date().getFullYear());
+        showToast('✅ تم تجهيز طلبك! جاري تحويلك للواتساب...');
+        setTimeout(() => {
+            window.open(whatsappUrl, '_blank');
+        }, 1200);
 
-        console.log('🎮 Games Store - المتجر جاهز | السودان');
-        console.log('🔄 التزامن مع لوحة الإدارة مفعل');
-    </script>
+        this.reset();
+    });
+
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ============ تحديث السنة تلقائياً ============
+    const yearSpan = document.querySelector('.footer-bottom p');
+    if (yearSpan) yearSpan.innerHTML = yearSpan.innerHTML.replace('2026', new Date().getFullYear());
+
+    // ============ التهيئة الأولية ============
+    function initStore() {
+        updateStoreFromAdmin();
+        
+        // الاستماع لتغييرات localStorage من علامات تبويب أخرى
+        window.addEventListener('storage', function(e) {
+            if (e.key === STORAGE_KEY) {
+                console.log('🔄 تم اكتشاف تحديث من لوحة الإدارة');
+                updateStoreFromAdmin();
+            }
+        });
+        
+        console.log('🎮 Games Store - المتجر جاهز | متزامن مع لوحة الإدارة');
+    }
+
+    // تشغيل التهيئة
+    initStore();
+</script>
 </body>
     </html>
